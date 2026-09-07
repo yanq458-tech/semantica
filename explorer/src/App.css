@@ -1,0 +1,182 @@
+/* =========================================================
+   Complex Organization Platform - Final Hero Layout
+   ========================================================= */
+
+/* 整个首页主区域：固定两列 */
+.landing-hero {
+    display: grid !important;
+    grid-template-columns: minmax(620px, 1.25fr) minmax(420px, 0.75fr) !important;
+
+    column-gap: 72px !important;
+    row-gap: 32px !important;
+
+    align-items: center !important;
+
+    width: 100% !important;
+    max-width: 1400px !important;
+
+    margin: 0 auto !important;
+    padding: 70px 48px 50px !important;
+}
+
+
+/* 左侧所有文字必须纵向排列 */
+.landing-copy {
+    display: flex !important;
+    flex-direction: column !important;
+
+    align-items: flex-start !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    max-width: 760px !important;
+    min-width: 620px !important;
+
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+
+    position: relative !important;
+}
+
+
+/* 大标题 */
+.landing-title {
+    width: 100% !important;
+    max-width: 760px !important;
+
+    margin: 0 0 26px !important;
+
+    font-family: "KaiTi", "STKaiti", "楷体", serif !important;
+    font-size: clamp(42px, 3.6vw, 62px) !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.02em !important;
+    font-weight: 400 !important;
+
+    color: #f0f7ff !important;
+
+    white-space: normal !important;
+    word-break: keep-all !important;
+}
+
+
+/* 标题两行 */
+.landing-title-line {
+    display: block !important;
+    white-space: nowrap !important;
+}
+
+
+/* 第二行渐变 */
+.landing-title-highlight {
+    color: transparent !important;
+
+    background: linear-gradient(
+        100deg,
+        #7fd0ff 0%,
+        #4cc38a 50%,
+        #f2b66d 100%
+    ) !important;
+
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+}
+
+
+/* 说明文字 */
+.landing-subtitle {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 650px !important;
+    min-width: 0 !important;
+
+    margin: 0 0 30px !important;
+
+    font-family:
+        "Microsoft YaHei",
+        "PingFang SC",
+        "Noto Sans CJK SC",
+        sans-serif !important;
+
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    font-weight: 400 !important;
+
+    color: #a8bdd3 !important;
+
+    writing-mode: horizontal-tb !important;
+
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+
+    position: static !important;
+    transform: none !important;
+}
+
+
+/* 两个按钮 */
+.landing-cta-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    gap: 16px !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    position: static !important;
+    transform: none !important;
+}
+
+
+/* 防止按钮被压成竖排 */
+.landing-cta-primary,
+.landing-cta-secondary {
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: auto !important;
+    min-width: 180px !important;
+    height: 54px !important;
+
+    padding: 0 24px !important;
+
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+
+    position: static !important;
+    transform: none !important;
+}
+
+
+/* 主按钮略宽 */
+.landing-cta-primary {
+    min-width: 210px !important;
+}
+
+
+/* 右侧 Preview 区域 */
+.landing-preview {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 540px !important;
+    min-width: 420px !important;
+
+    justify-self: end !important;
+    align-self: center !important;
+
+    margin: 0 !important;
+
+    position: relative !important;
+    transform: none !important;
+}

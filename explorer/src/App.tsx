@@ -31,8 +31,9 @@ const EntityResolutionTab = lazy(() => import('./workspaces/EnrichWorkspace/Enti
 const KGOverviewTab = lazy(() => import('./workspaces/ManageWorkspace/KGOverviewTab').then((module) => ({ default: module.KGOverviewTab })));
 const OntologySummaryTab = lazy(() => import('./workspaces/ManageWorkspace/OntologySummaryTab').then((module) => ({ default: module.OntologySummaryTab })));
 const OntologyWorkspace = lazy(() => import('./workspaces/OntologyWorkspace').then((module) => ({ default: module.OntologyWorkspace })));
+const OptimizationWorkspace = lazy(() => import('./workspaces/OptimizationWorkspace').then((module) => ({ default: module.OptimizationWorkspace })));
 
-type WorkspaceId = 'welcome' | 'explore' | 'analyze' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
+type WorkspaceId = 'welcome' | 'explore' | 'analyze' | 'optimization' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
 type ExploreView = 'graph' | 'vocabulary';
 type AnalyzeView = 'sparql' | 'reasoning';
 type EnrichView = 'import' | 'merge' | 'registry' | 'resolve';
@@ -85,12 +86,13 @@ const PREVIEW_DOTS = Array.from({ length: 42 }, (_, i) => ({
 }));
 
 const navItems: NavItem[] = [
-  { id: 'explore', label: 'Knowledge Explorer', hint: 'Graph and vocabulary browsing', icon: Database },
-  { id: 'analyze', label: 'Analyze', hint: 'Query and inspect the dataset', icon: FileSearch },
-  { id: 'decisions', label: 'Decisions', hint: 'Decision chains and precedent review', icon: Scale },
-  { id: 'enrich', label: 'Enrich', hint: 'Import, export, and merge workflows', icon: GitBranchPlus },
-  { id: 'manage', label: 'Manage', hint: 'Lineage and governance tooling', icon: Settings2 },
-  { id: 'ontology-hub', label: 'Ontology Hub', hint: 'Schema governance, registry, and vocabulary management', icon: GitMerge },
+  { id: 'explore', label: '知识图谱', hint: 'Graph and vocabulary browsing', icon: Database },
+  { id: 'analyze', label: '模型分析', hint: 'Query and inspect the dataset', icon: FileSearch },
+  { id: 'optimization', label: '优化推演', hint: 'Railway scenarios, optimization runs, and solution comparison', icon: Radar },
+  { id: 'decisions', label: '决策管理', hint: 'Decision chains and precedent review', icon: Scale },
+  { id: 'enrich', label: '知识增强', hint: 'Import, export, and merge workflows', icon: GitBranchPlus },
+  { id: 'manage', label: '数据与模型', hint: 'Lineage and governance tooling', icon: Settings2 },
+  { id: 'ontology-hub', label: '本体与规则', hint: 'Schema governance, registry, and vocabulary management', icon: GitMerge },
 ];
 
 const shellStyles = `
@@ -710,16 +712,28 @@ const shellStyles = `
   /* ── Hero ──────────────────────────────────────────────── */
   .landing-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(380px, 520px);
-    gap: clamp(24px, 3vw, 48px);
+
+    grid-template-columns:
+        minmax(0, 1.4fr)
+        minmax(480px, 0.8fr);
+
+    gap: 60px;
     align-items: center;
-    min-height: min(580px, calc(100vh - 140px));
+
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 70px 50px;
   }
 
   .landing-copy {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    align-items: flex-start;
+
+    width: 100%;
+    max-width: 820px;
+    min-width: 0;
   }
 
   .landing-status-bar {
@@ -809,35 +823,64 @@ const shellStyles = `
   }
 
   .landing-title {
-    margin: 0 0 20px;
+    margin: 0 0 28px;
+
     color: #f0f7ff;
-    font-family: "Inter", "Segoe UI", sans-serif;
-    font-size: clamp(38px, 4.8vw, 72px);
-    line-height: 1.08;
-    letter-spacing: -0.04em;
-    font-weight: 800;
+
+    font-family: "KaiTi", "STKaiti", "楷体", serif;
+    font-size: clamp(40px, 3.2vw, 56px);
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+
+    width: 100%;
+    max-width: 720px;
+
+    word-break: keep-all;
+    overflow-wrap: normal;
+}
+
+   .landing-title-line {
+    display: block;
+    white-space: nowrap;
   }
 
-  .landing-title span {
+  .landing-title-highlight {
     color: transparent;
-    background: linear-gradient(100deg, #7fd0ff 0%, #4cc38a 50%, #f2b66d 100%);
+    background: linear-gradient(
+        100deg,
+        #7fd0ff 0%,
+        #4cc38a 50%,
+        #f2b66d 100%
+    );
     -webkit-background-clip: text;
     background-clip: text;
   }
 
   .landing-subtitle {
-    margin: 0 0 32px;
-    color: #7a99b8;
-    font-size: clamp(14px, 1.2vw, 17px);
-    line-height: 1.7;
-    max-width: 54ch;
-  }
+    width: 100% !important;
+    max-width: 560px !important;
+    min-width: 420px !important;
+
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+
+    writing-mode: horizontal-tb !important;
+
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-size: 18px;
+    line-height: 1.8;
+   }
 
   .landing-cta-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+
+    gap: 16px;
+    width: 100% !important;
+    min-width: 420px;
   }
 
   .landing-cta-primary {
@@ -1380,9 +1423,16 @@ const shellStyles = `
     }
 
     .landing-hero {
-      grid-template-columns: 1fr;
-      min-height: auto;
-    }
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.85fr);
+    gap: 56px;
+    align-items: center;
+
+    width: 100%;
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 72px 40px 56px;
+   }
 
     .landing-workspace-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1446,9 +1496,12 @@ const shellStyles = `
     .landing-workspace-card,
     .landing-cta-primary,
     .landing-cta-secondary {
-      animation: none;
-      transition: none;
-    }
+    min-width: 170px !important;
+    width: auto !important;
+
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+  }
   }
 `;
 
@@ -1602,33 +1655,38 @@ function WelcomeScreen({
               <div className="landing-status-dot" />
               <span className="landing-status-text">{CONNECTION_STATUS_LABEL[stats.status]}</span>
               <div className="landing-status-divider" />
-              <span className="landing-status-version">Semantica v2 · Semantic Intelligence</span>
-            </div>
+             <span className="landing-status-version">
+             复杂组织体搭建平台 · Verified-MBSE
+             </span>
+             </div>
 
-            <div className="landing-kicker" aria-label="Product category">
-              <span className="landing-kicker-mark" aria-hidden="true" />
-              Knowledge Explorer
-            </div>
+             <div className="landing-kicker" aria-label="Product category">
+             <span className="landing-kicker-mark" aria-hidden="true" />
+             复杂组织体建模
+             </div>
 
-            <h1 className="landing-title">
-              Navigate knowledge<br />
-              like a <span>living system.</span>
-            </h1>
-            <p className="landing-subtitle">
-              Semantica turns dense knowledge graphs into a navigable command center —
-              discovery, reasoning, provenance, distance intelligence, and decision context,
-              all in one interface.
-            </p>
+             <h1 className="landing-title">
+             <span className="landing-title-line">
+             构建可建模、可验证、
+             </span>
+             <span className="landing-title-line landing-title-highlight">
+             可推演的复杂组织体。
+             </span>
+             </h1>
+
+             <p className="landing-subtitle">
+             面向复杂组织体的统一建模、语义关联、规则验证、优化决策与全链路追溯平台。
+             </p>
 
             <div className="landing-cta-row">
               <button className="landing-cta-primary" type="button" onClick={onOpenNetwork}>
                 <Network size={16} />
-                Open Semantica Explorer
+                进入组织体建模
                 <ArrowRight size={15} />
               </button>
               <button className="landing-cta-secondary" type="button" onClick={onOpenReasoning}>
                 <BrainCircuit size={15} />
-                Run Reasoning
+                运行规则推演
               </button>
             </div>
           </div>
@@ -1705,6 +1763,7 @@ function WelcomeScreen({
               </div>
             </div>
           </div>
+          
         </section>
 
         {/* ── Live metrics ── */}
@@ -1881,6 +1940,23 @@ export default function App() {
       );
     }
 
+    if (activeWorkspace === 'optimization') {
+      return (
+        <WorkspaceShell
+          title="Optimization"
+          subtitle="Validate railway disturbances, run allocation models, and inspect traceable solutions."
+          kicker="Railway Scenario Lab"
+          compact
+        >
+          <ErrorBoundary key="optimization">
+            <Suspense fallback={<WorkspaceFallback />}>
+              <OptimizationWorkspace />
+            </Suspense>
+          </ErrorBoundary>
+        </WorkspaceShell>
+      );
+    }
+
     if (activeWorkspace === 'enrich') {
       return (
         <WorkspaceShell
@@ -1977,7 +2053,7 @@ export default function App() {
       <style>{shellStyles}</style>
       <div className="app-shell">
         <aside className="app-rail">
-          <button className="brand-pill" title="Semantica Knowledge Explorer" onClick={() => setActiveWorkspace('welcome')} style={{ cursor: 'pointer', border: '1px solid rgba(127,208,255,0.18)' }}>SKE</button>
+          <button className="brand-pill" title="Semantica Knowledge Explorer" onClick={() => setActiveWorkspace('welcome')} style={{ cursor: 'pointer', border: '1px solid rgba(127,208,255,0.18)' }}>COE</button>
           {navItems.map(({ id, label, hint, icon: Icon }) => (
             <button
               key={id}
@@ -1996,3 +2072,4 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+/* ===== 首页说明文字修正 ===== */
