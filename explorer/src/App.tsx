@@ -34,8 +34,9 @@ const OntologySummaryTab = lazy(() => import('./workspaces/ManageWorkspace/Ontol
 const OntologyWorkspace = lazy(() => import('./workspaces/OntologyWorkspace').then((module) => ({ default: module.OntologyWorkspace })));
 const OptimizationWorkspace = lazy(() => import('./workspaces/OptimizationWorkspace').then((module) => ({ default: module.OptimizationWorkspace })));
 const AgentWorkspace = lazy(() => import('./workspaces/AgentWorkspace').then((module) => ({ default: module.AgentWorkspace })));
+const ScenarioWorkspace = lazy(() => import('./workspaces/ScenarioWorkspace').then((module) => ({ default: module.ScenarioWorkspace })));
 
-type WorkspaceId = 'welcome' | 'explore' | 'agents' | 'analyze' | 'optimization' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
+type WorkspaceId = 'welcome' | 'explore' | 'agents' | 'analyze' | 'scenarios' | 'optimization' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
 type ExploreView = 'graph' | 'vocabulary';
 type AnalyzeView = 'sparql' | 'reasoning';
 type EnrichView = 'import' | 'merge' | 'registry' | 'resolve';
@@ -92,6 +93,7 @@ const navItems: NavItem[] = [
   { id: 'agents', label: '智能体中心', hint: '智能体配置、状态、任务与执行记录', icon: Bot },
   { id: 'ontology-hub', label: '模型与规则', hint: '组织体模型、规则、约束与版本', icon: GitMerge },
   { id: 'analyze', label: '组织体分析', hint: '组织关系查询、规则推演与数据检查', icon: FileSearch },
+  { id: 'scenarios', label: '场景推演', hint: '场景定义、变化、验证和推演流程', icon: Route },
   { id: 'optimization', label: '优化决策', hint: '场景校验、优化运行与候选方案比较', icon: Radar },
   { id: 'decisions', label: '决策分析', hint: '决策依据、影响路径与证据链', icon: Scale },
   { id: 'enrich', label: '数据与知识', hint: '数据导入、对齐、合并与登记', icon: GitBranchPlus },
@@ -1903,6 +1905,10 @@ export default function App() {
 
     if (activeWorkspace === 'agents') {
       return <WorkspaceShell title="智能体中心" subtitle="配置面向建模、验证、推演、优化、决策和报告的业务智能体。" kicker="Agent Center" compact><ErrorBoundary key="agents"><Suspense fallback={<WorkspaceFallback />}><AgentWorkspace /></Suspense></ErrorBoundary></WorkspaceShell>;
+    }
+
+    if (activeWorkspace === 'scenarios') {
+      return <WorkspaceShell title="场景推演" subtitle="管理与基础事实分离的业务场景，并进入验证和优化流程。" kicker="Scenario Workspace" compact><ErrorBoundary key="scenarios"><Suspense fallback={<WorkspaceFallback />}><ScenarioWorkspace onOpenOptimization={() => setActiveWorkspace('optimization')} /></Suspense></ErrorBoundary></WorkspaceShell>;
     }
 
     if (activeWorkspace === 'analyze') {
