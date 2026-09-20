@@ -42,6 +42,7 @@ export function CausalAnalysisPanel({ decisionId, legacyFallback }: { decisionId
 
   const activeGraph = queryGraph ?? chain?.graph;
   const selectedEvidence = useMemo(() => activeGraph?.evidence.filter((item) => selectedNode?.evidenceRefs.includes(item.id)) ?? [], [activeGraph, selectedNode]);
+  const selectedMechanism = useMemo(() => activeGraph?.mechanisms.find((item) => item.id === selectedNode?.id) ?? null, [activeGraph, selectedNode]);
 
   async function traverse(direction: 'forward' | 'backward') {
     const start = selectedNode?.id ?? decisionId;
@@ -72,7 +73,7 @@ export function CausalAnalysisPanel({ decisionId, legacyFallback }: { decisionId
       <button className={tab === 'impact' ? 'active' : ''} onClick={() => setTab('impact')}>影响分析</button>
       <button className={tab === 'comparison' ? 'active' : ''} onClick={() => setTab('comparison')}>干预比较</button>
     </div>
-    {tab === 'chain' && (chain ? <div className="causal-split"><CausalChainView graph={chain.graph} orderedChain={chain.orderedChain} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/><CausalNodeDetail node={selectedNode} evidence={selectedEvidence}/></div> : legacyFallback)}
+    {tab === 'chain' && (chain ? <div className="causal-split"><CausalChainView graph={chain.graph} orderedChain={chain.orderedChain} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/><CausalNodeDetail node={selectedNode} evidence={selectedEvidence} mechanism={selectedMechanism}/></div> : legacyFallback)}
     {tab === 'impact' && <div className="causal-analysis-body">
       <div className="causal-actions"><button className="ws-btn ws-btn--ghost" disabled={loading} onClick={() => void traverse('forward')}>正向影响</button><button className="ws-btn ws-btn--ghost" disabled={loading} onClick={() => void traverse('backward')}>反向解释</button><button className="ws-btn ws-btn--ghost" onClick={() => { setQueryGraph(undefined); setQueryMessage(''); }}>重置</button></div>
       {queryMessage && <div className="causal-query-note">{queryMessage}</div>}
