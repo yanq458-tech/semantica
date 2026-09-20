@@ -2,6 +2,7 @@ import type { AssignmentExplanation, AssignmentRow, MetricName, OptimizationRun,
 import type { CausalStageKind } from '../../core/models';
 import { ACTIVE_DOMAIN_PACK } from '../../domains';
 import { railwayScenarioRequestBody } from '../../domains/railway';
+import { loadCausalChain } from '../../components/causal/api';
 
 const API_BASE = ACTIVE_DOMAIN_PACK.apiBase ?? '';
 
@@ -46,8 +47,8 @@ export function compareSolutions(left: string, right: string): Promise<SolutionC
   return requestJson<Record<string, unknown>>(`${API_BASE}/solutions/compare?left=${encodeURIComponent(left)}&right=${encodeURIComponent(right)}`).then((row) => { const changes = row.assignment_changes as Record<string, unknown>; return { leftSolutionId: String(row.left_solution), rightSolutionId: String(row.right_solution), metricDeltas: row.metric_deltas as SolutionComparison['metricDeltas'], assignmentChanges: { count: Number(changes.count), addedTasks: changes.added_tasks as string[], removedTasks: changes.removed_tasks as string[], changedTasks: changes.changed_tasks as SolutionComparison['assignmentChanges']['changedTasks'] } }; });
 }
 
-export function loadExplanation(assignmentId: string): Promise<AssignmentExplanation> {
-  return requestJson<{
+export async function loadExplanation(assignmentId: string): Promise<AssignmentExplanation> {
+  const row = await requestJson<{
     assignment_id: string;
     evidence_chain: Array<{ kind: string; entity_id: string; facts: Record<string, unknown> }>;
     causal_chain?: {
@@ -57,7 +58,8 @@ export function loadExplanation(assignmentId: string): Promise<AssignmentExplana
       source: string;
       stages: Array<{ order: number; stage: CausalStageKind; label: string; entity_id: string; facts: Record<string, unknown> }>;
     };
-  }>(`${API_BASE}/assignments/${encodeURIComponent(assignmentId)}/explanation`).then((row) => ({
+  }>(`${API_BASE}/assignments/${encodeURIComponent(assignmentId)}/explanation`);
+  const result: AssignmentExplanation = {
     assignmentId: row.assignment_id,
     evidenceChain: row.evidence_chain.map((step) => ({ kind: step.kind, entityId: step.entity_id, facts: step.facts })),
     causalChain: row.causal_chain ? {
@@ -73,5 +75,13 @@ export function loadExplanation(assignmentId: string): Promise<AssignmentExplana
         facts: stage.facts,
       })),
     } : undefined,
-  }));
+  };
+  try {
+    const v2 = await loadCausalChain(assignmentId);
+    result.causalGraphV2 = v2.graph;
+    result.orderedChainV2 = v2.orderedChain;
+  } catch {
+    // V1 and historical Assignment explanations remain fully usable.
+  }
+  return result;
 }

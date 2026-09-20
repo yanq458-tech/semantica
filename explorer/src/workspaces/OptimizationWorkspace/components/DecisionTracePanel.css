@@ -29,3 +29,11 @@
   background: rgba(52, 211, 153, 0.14);
   color: #6ee7b7;
 }
+
+.opt-causal-detail {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.18);
+}

@@ -1,5 +1,6 @@
 import type { RailwayDisturbanceKind, RailwayScenarioChange, RailwayScenarioRequest } from '../../domains/railway/types';
 import type { CausalEvidenceChain } from '../../core/models';
+import type { CausalGraph } from '../../components/causal/types';
 export type DisturbanceKind = RailwayDisturbanceKind;
 export type ScenarioChange = RailwayScenarioChange;
 export type ScenarioRequest = RailwayScenarioRequest;
@@ -55,4 +56,4 @@ export interface SolutionComparison {
 }
 
 export interface EvidenceStep { kind: string; entityId: string; facts: Record<string, unknown> }
-export interface AssignmentExplanation { assignmentId: string; evidenceChain: EvidenceStep[]; causalChain?: CausalEvidenceChain }
+export interface AssignmentExplanation { assignmentId: string; evidenceChain: EvidenceStep[]; causalChain?: CausalEvidenceChain; causalGraphV2?: CausalGraph; orderedChainV2?: string[] }
