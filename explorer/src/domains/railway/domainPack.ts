@@ -6,6 +6,6 @@ export const railwayDomainPack: DomainPack = {
   entityTypes: ['TrainService', 'EMUSet', 'Station', 'Route', 'TimeWindow', 'ConstraintRule'],
   relationTypes: ['departsFrom', 'arrivesAt', 'usesRoute', 'assignedTo', 'constrainedBy'],
   scenarioTypes: ['resource-assignment', 'resource-unavailable', 'task-addition', 'task-time-change'],
-  capabilities: ['scenario-validation', 'optimization', 'solution-comparison', 'assignment-explanation', 'provenance'],
+  capabilities: ['scenario-validation', 'optimization', 'solution-comparison', 'assignment-explanation', 'provenance', 'causal-analysis-v2', 'intervention-comparison', 'bounded-impact-traversal'],
   labels: { resource: '动车组', task: '开行任务', resourceType: '车型', assignment: '动车组分配', domainCase: '铁路开行' },
 };
