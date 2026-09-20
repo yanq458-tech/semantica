@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Scale, Search, ArrowRight, Info, GitCompareArrows, ShieldCheck, Waypoints } from "lucide-react";
 import { CausalAnalysisPanel } from './CausalAnalysisPanel';
+import { loadDecisionAnalysis } from './api';
+import type { DecisionAnalysis } from './types';
+import { DecisionAnalysisSummary } from './DecisionAnalysisSummary';
+import './DecisionAnalysisSummary.css';
 
 type OutcomeKind = "approved" | "rejected" | "deferred" | "pending" | string;
 
@@ -94,6 +98,7 @@ export function DecisionWorkspace({ onOpenOptimization }: { onOpenOptimization?:
   const [listLoading, setListLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [error, setError] = useState("");
+  const [analysis, setAnalysis] = useState<DecisionAnalysis>();
 
   // Tracks the active chain request so stale responses from rapid selections are ignored.
   const chainCtrlRef = useRef<AbortController | null>(null);
@@ -137,6 +142,7 @@ export function DecisionWorkspace({ onOpenOptimization }: { onOpenOptimization?:
     setSelected(d);
     setChainLoading(true);
     setChain([]);
+    setAnalysis(undefined);
     setError("");
     try {
       const res = await fetch(`/api/decisions/${encodeURIComponent(d.decision_id)}/chain`, { signal: ctrl.signal });
@@ -146,6 +152,7 @@ export function DecisionWorkspace({ onOpenOptimization }: { onOpenOptimization?:
         setError(data.message || "Warning: Partial success loading chain.");
       }
       if (!ctrl.signal.aborted) setChain(data.chain || []);
+      void loadDecisionAnalysis(d.decision_id).then((value) => { if (!ctrl.signal.aborted) setAnalysis(value); }).catch(() => { /* Historical records keep the legacy view. */ });
     } catch (e) {
       if (e instanceof Error && e.name !== "AbortError") {
         setError(e.message);
@@ -270,6 +277,8 @@ export function DecisionWorkspace({ onOpenOptimization }: { onOpenOptimization?:
                 ["决策数量", decisions.length], ["当前可用候选", feasibleCount], ["证据链步骤", chain.length], ["约束与规则证据", evidenceSummary.rules],
               ].map(([label, value]) => <div className="ws-card" style={{ padding: 13 }} key={String(label)}><div style={{ color: "var(--ws-text-dim)", fontSize: 9, marginBottom: 5 }}>{label}</div><strong style={{ fontSize: 19 }}>{value}</strong></div>)}
             </div>
+
+            {analysis && <DecisionAnalysisSummary analysis={analysis}/>}
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
               <section className="ws-card" style={{ padding: 17 }}><div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12 }}><ShieldCheck size={15} color="var(--ws-accent)"/><strong>决策依据</strong></div><div style={{ display: "grid", gap: 7, fontSize: 11, color: "var(--ws-text-muted)" }}><div>输入数据与场景：{evidenceSummary.data} 项证据</div><div>业务规则与数学约束：{evidenceSummary.rules} 项证据</div><div>模型、运行与求解器：{evidenceSummary.model} 项证据</div><div>方案、分配与目标值：{evidenceSummary.solution} 项证据</div></div></section>
