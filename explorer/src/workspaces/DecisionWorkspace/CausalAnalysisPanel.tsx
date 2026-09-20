@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ACTIVE_DOMAIN_PACK } from '../../domains';
 import { CausalChainView } from '../../components/causal/CausalChainView';
-import { CausalImpactView } from '../../components/causal/CausalImpactView';
+import { CausalGraphView } from '../../components/causal/CausalGraphView';
+import { CausalImpactPanel } from '../../components/causal/CausalImpactPanel';
 import { CausalNodeDetail } from '../../components/causal/CausalNodeDetail';
+import { CausalViewSwitcher, type CausalViewMode } from '../../components/causal/CausalViewSwitcher';
 import { compareInterventions, loadBackwardExplanation, loadCausalChain, loadForwardImpact } from '../../components/causal/api';
 import type { CausalChainResponse, CausalGraph, CausalNode, InterventionComparison } from '../../components/causal/types';
 
@@ -10,6 +12,7 @@ type Tab = 'chain' | 'impact' | 'comparison';
 
 export function CausalAnalysisPanel({ decisionId, legacyFallback }: { decisionId: string; legacyFallback: ReactNode }) {
   const [tab, setTab] = useState<Tab>('chain');
+  const [viewMode, setViewMode] = useState<CausalViewMode>('chain');
   const [chain, setChain] = useState<CausalChainResponse>();
   const [selectedNode, setSelectedNode] = useState<CausalNode>();
   const [queryGraph, setQueryGraph] = useState<CausalGraph>();
@@ -73,16 +76,16 @@ export function CausalAnalysisPanel({ decisionId, legacyFallback }: { decisionId
       <button className={tab === 'impact' ? 'active' : ''} onClick={() => setTab('impact')}>影响分析</button>
       <button className={tab === 'comparison' ? 'active' : ''} onClick={() => setTab('comparison')}>干预比较</button>
     </div>
-    {tab === 'chain' && (chain ? <div className="causal-split"><CausalChainView graph={chain.graph} orderedChain={chain.orderedChain} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/><CausalNodeDetail node={selectedNode} evidence={selectedEvidence} mechanism={selectedMechanism}/></div> : legacyFallback)}
+    {tab === 'chain' && (chain ? <><CausalViewSwitcher mode={viewMode} onChange={setViewMode}/><div className="causal-split">{viewMode === 'chain' ? <CausalChainView graph={chain.graph} orderedChain={chain.orderedChain} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/> : <CausalGraphView graph={chain.graph} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/>}<CausalNodeDetail node={selectedNode} evidence={selectedEvidence} mechanism={selectedMechanism}/></div></> : legacyFallback)}
     {tab === 'impact' && <div className="causal-analysis-body">
       <div className="causal-actions"><button className="ws-btn ws-btn--ghost" disabled={loading} onClick={() => void traverse('forward')}>正向影响</button><button className="ws-btn ws-btn--ghost" disabled={loading} onClick={() => void traverse('backward')}>反向解释</button><button className="ws-btn ws-btn--ghost" onClick={() => { setQueryGraph(undefined); setQueryMessage(''); }}>重置</button></div>
       {queryMessage && <div className="causal-query-note">{queryMessage}</div>}
-      <CausalImpactView impacts={activeGraph?.impacts ?? []}/>
-      {queryGraph && <CausalChainView graph={queryGraph} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/>} 
+      <CausalImpactPanel impacts={activeGraph?.impacts ?? []}/>
+      {queryGraph && <CausalGraphView graph={queryGraph} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode}/>}
     </div>}
     {tab === 'comparison' && <div className="causal-analysis-body">
       <div className="causal-compare-controls"><select value={baseline} onChange={(event) => setBaseline(event.target.value)}>{scenarios.map((item) => <option key={item.id} value={item.id}>{item.id}</option>)}</select><span>→</span><select value={intervention} onChange={(event) => setIntervention(event.target.value)}>{scenarios.map((item) => <option key={item.id} value={item.id}>{item.id}</option>)}</select><button className="ws-btn ws-btn--primary" disabled={loading || !baseline || !intervention || baseline === intervention} onClick={() => void runComparison()}>比较干预</button></div>
-      {comparison && <><div className={`causal-query-note ${comparison.comparabilityStatus === 'comparable' ? 'ok' : 'warn'}`}>可比性：{comparison.comparabilityStatus}{comparison.comparabilityReasons.length ? ` · ${comparison.comparabilityReasons.join('；')}` : ''}</div><div className="causal-interventions">{comparison.changedVariables.map((item) => <div key={item.id}><strong>{item.variable}</strong><span>{String(item.before ?? '不可用')} → {String(item.after ?? '不可用')}</span></div>)}</div><CausalImpactView impacts={comparison.impacts}/></>}
+      {comparison && <><div className={`causal-query-note ${comparison.comparabilityStatus === 'comparable' ? 'ok' : 'warn'}`}>可比性：{comparison.comparabilityStatus}{comparison.comparabilityReasons.length ? ` · ${comparison.comparabilityReasons.join('；')}` : ''}</div><div className="causal-interventions">{comparison.changedVariables.map((item) => <div key={item.id}><strong>{item.variable}</strong><span>{String(item.before ?? '不可用')} → {String(item.after ?? '不可用')}</span></div>)}</div><CausalImpactPanel impacts={comparison.impacts}/></>}
     </div>}
   </div>;
 }

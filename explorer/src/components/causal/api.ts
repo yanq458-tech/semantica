@@ -42,7 +42,17 @@ function mapImpact(row: Json): Impact {
 }
 
 function mapGraph(row: Json): CausalGraph {
-  return { schemaVersion: '2.0', graphId: String(row.graph_id), scope: row.scope as CausalGraph['scope'], nodes: (row.nodes as Json[]).map(mapNode), edges: (row.edges as Json[]).map(mapEdge), evidence: (row.evidence as Json[]).map(mapEvidence), mechanisms: (row.mechanisms as Json[]).map(mapMechanism), impacts: (row.impacts as Json[]).map(mapImpact) };
+  const nodes = (row.nodes as Json[]).map(mapNode);
+  const edges = (row.edges as Json[]).map(mapEdge);
+  const incoming = new Set(edges.map((edge) => edge.target));
+  const outgoing = new Set(edges.map((edge) => edge.source));
+  return {
+    schemaVersion: '2.0', graphId: String(row.graph_id), scope: row.scope as CausalGraph['scope'],
+    nodes, edges, evidence: (row.evidence as Json[]).map(mapEvidence),
+    mechanisms: (row.mechanisms as Json[]).map(mapMechanism), impacts: (row.impacts as Json[]).map(mapImpact),
+    rootNodes: Array.isArray(row.root_nodes) ? row.root_nodes.map(String) : nodes.filter((node) => !incoming.has(node.id)).map((node) => node.id),
+    terminalNodes: Array.isArray(row.terminal_nodes) ? row.terminal_nodes.map(String) : nodes.filter((node) => !outgoing.has(node.id)).map((node) => node.id),
+  };
 }
 
 export async function loadCausalChain(decisionId: string): Promise<CausalChainResponse> {

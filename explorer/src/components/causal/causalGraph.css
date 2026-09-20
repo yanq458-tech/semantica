@@ -1,0 +1,4 @@
+.causal-graph-view{height:520px;min-height:360px;border:1px solid var(--ws-border);border-radius:10px;overflow:hidden;background:rgba(4,10,18,.5)}
+.causal-graph-label{display:grid;gap:4px;text-align:left}.causal-graph-label small{font-size:8px;text-transform:uppercase;color:#8da2b8}.causal-graph-label strong{font-size:11px}
+.causal-view-switcher{display:flex;gap:5px;justify-content:flex-end}.causal-view-switcher button{border:1px solid var(--ws-border);background:transparent;color:var(--ws-text-muted);border-radius:7px;padding:6px 10px;cursor:pointer}.causal-view-switcher button.active{background:var(--ws-accent-soft);border-color:var(--ws-border-strong);color:var(--ws-accent)}
+.causal-impact-panel{display:grid;gap:12px}.causal-impact-panel>section{display:grid;gap:8px}.causal-impact-panel h4{margin:0;text-transform:capitalize;color:var(--ws-text-muted);font-size:10px}

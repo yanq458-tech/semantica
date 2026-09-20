@@ -46,6 +46,7 @@ export type CausalNodeType =
   | 'observation'
   | 'state'
   | 'event'
+  | 'action'
   | 'intervention'
   | 'constraint'
   | 'optimization'
@@ -170,6 +171,8 @@ export interface CausalGraph {
   evidence: CausalEvidence[];
   mechanisms: CausalMechanism[];
   impacts: Impact[];
+  rootNodes: string[];
+  terminalNodes: string[];
 }
 
 export interface CausalTraversalResult {
