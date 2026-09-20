@@ -5,3 +5,4 @@ export * from './optimization';
 export * from './decision';
 export * from './report';
 export * from './provenance';
+export * from './causal';

@@ -1,4 +1,5 @@
 import type { AssignmentExplanation, AssignmentRow, MetricName, OptimizationRun, ScenarioRequest, ScenarioSummary, Solution, SolutionComparison } from './types';
+import type { CausalStageKind } from '../../core/models';
 import { ACTIVE_DOMAIN_PACK } from '../../domains';
 import { railwayScenarioRequestBody } from '../../domains/railway';
 
@@ -46,5 +47,31 @@ export function compareSolutions(left: string, right: string): Promise<SolutionC
 }
 
 export function loadExplanation(assignmentId: string): Promise<AssignmentExplanation> {
-  return requestJson<{ assignment_id: string; evidence_chain: Array<{ kind: string; entity_id: string; facts: Record<string, unknown> }> }>(`${API_BASE}/assignments/${encodeURIComponent(assignmentId)}/explanation`).then((row) => ({ assignmentId: row.assignment_id, evidenceChain: row.evidence_chain.map((step) => ({ kind: step.kind, entityId: step.entity_id, facts: step.facts })) }));
+  return requestJson<{
+    assignment_id: string;
+    evidence_chain: Array<{ kind: string; entity_id: string; facts: Record<string, unknown> }>;
+    causal_chain?: {
+      chain_id: string;
+      question: string;
+      scope: 'auditable_decision_evidence';
+      source: string;
+      stages: Array<{ order: number; stage: CausalStageKind; label: string; entity_id: string; facts: Record<string, unknown> }>;
+    };
+  }>(`${API_BASE}/assignments/${encodeURIComponent(assignmentId)}/explanation`).then((row) => ({
+    assignmentId: row.assignment_id,
+    evidenceChain: row.evidence_chain.map((step) => ({ kind: step.kind, entityId: step.entity_id, facts: step.facts })),
+    causalChain: row.causal_chain ? {
+      chainId: row.causal_chain.chain_id,
+      question: row.causal_chain.question,
+      scope: row.causal_chain.scope,
+      source: row.causal_chain.source,
+      stages: row.causal_chain.stages.map((stage) => ({
+        order: stage.order,
+        stage: stage.stage,
+        label: stage.label,
+        entityId: stage.entity_id,
+        facts: stage.facts,
+      })),
+    } : undefined,
+  }));
 }
