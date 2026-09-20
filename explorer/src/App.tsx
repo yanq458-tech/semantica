@@ -6,6 +6,7 @@ import {
   Bot,
   Database,
   FileSearch,
+  FileText,
   GitBranchPlus,
   GitMerge,
   Network,
@@ -35,8 +36,9 @@ const OntologyWorkspace = lazy(() => import('./workspaces/OntologyWorkspace').th
 const OptimizationWorkspace = lazy(() => import('./workspaces/OptimizationWorkspace').then((module) => ({ default: module.OptimizationWorkspace })));
 const AgentWorkspace = lazy(() => import('./workspaces/AgentWorkspace').then((module) => ({ default: module.AgentWorkspace })));
 const ScenarioWorkspace = lazy(() => import('./workspaces/ScenarioWorkspace').then((module) => ({ default: module.ScenarioWorkspace })));
+const ReportWorkspace = lazy(() => import('./workspaces/ReportWorkspace').then((module) => ({ default: module.ReportWorkspace })));
 
-type WorkspaceId = 'welcome' | 'explore' | 'agents' | 'analyze' | 'scenarios' | 'optimization' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
+type WorkspaceId = 'welcome' | 'explore' | 'agents' | 'analyze' | 'scenarios' | 'optimization' | 'decisions' | 'reports' | 'enrich' | 'manage' | 'ontology-hub';
 type ExploreView = 'graph' | 'vocabulary';
 type AnalyzeView = 'sparql' | 'reasoning';
 type EnrichView = 'import' | 'merge' | 'registry' | 'resolve';
@@ -96,6 +98,7 @@ const navItems: NavItem[] = [
   { id: 'scenarios', label: '场景推演', hint: '场景定义、变化、验证和推演流程', icon: Route },
   { id: 'optimization', label: '优化决策', hint: '场景校验、优化运行与候选方案比较', icon: Radar },
   { id: 'decisions', label: '决策分析', hint: '决策依据、影响路径与证据链', icon: Scale },
+  { id: 'reports', label: '报告中心', hint: '报告列表、生成、预览与导出', icon: FileText },
   { id: 'enrich', label: '数据与知识', hint: '数据导入、对齐、合并与登记', icon: GitBranchPlus },
   { id: 'manage', label: '系统管理', hint: '来源追溯、模型概览与治理', icon: Settings2 },
 ];
@@ -1951,6 +1954,10 @@ export default function App() {
           </ErrorBoundary>
         </WorkspaceShell>
       );
+    }
+
+    if (activeWorkspace === 'reports') {
+      return <WorkspaceShell title="报告中心" subtitle="汇总组织体、场景、验证、优化和决策依据，形成可核查报告。" kicker="Report Center" compact><ErrorBoundary key="reports"><Suspense fallback={<WorkspaceFallback />}><ReportWorkspace /></Suspense></ErrorBoundary></WorkspaceShell>;
     }
 
     if (activeWorkspace === 'optimization') {
