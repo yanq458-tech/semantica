@@ -681,7 +681,7 @@ export function buildGraphAnalyticsSnapshot(params: {
       ready: semanticRegionSummaries.length > 0,
       reason: semanticRegionSummaries.length > 0
         ? "Ready"
-        : "No semantic regions are visible in the current graph context.",
+        : "当前组织体视图中没有可显示的对象类型区域。",
       summaries: semanticRegionSummaries,
     },
     overviewBackbone,

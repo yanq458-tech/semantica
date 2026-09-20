@@ -14,7 +14,7 @@ export const legendPlugin: GraphPlugin = {
     {
       id: "legend-toggle",
       label: "Legend",
-      title: "Toggle semantic legend",
+      title: "切换对象类型图例",
       active: context.isPanelOpen(LEGEND_PANEL_ID),
       order: 20,
       onClick: () => context.dispatchAction({ type: "togglePanel", panelId: LEGEND_PANEL_ID }),
@@ -51,7 +51,7 @@ export const legendPlugin: GraphPlugin = {
       preferredHeight: 220,
       content: (
         <div style={panelBodyStyle}>
-          <div style={panelEyebrowStyle}>Semantic groups</div>
+          <div style={panelEyebrowStyle}>对象分组</div>
           {items.length ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {items.map((item) => (

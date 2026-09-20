@@ -120,7 +120,7 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
         )}
         {result.semantic_similarity != null && (
           <div style={metricCardStyle}>
-            <div style={metricLabelStyle}>Semantic Sim.</div>
+            <div style={metricLabelStyle}>关系相似度</div>
             <div style={{ ...metricValueStyle, color: "#79c0ff" }}>
               {(result.semantic_similarity * 100).toFixed(1)}%
             </div>

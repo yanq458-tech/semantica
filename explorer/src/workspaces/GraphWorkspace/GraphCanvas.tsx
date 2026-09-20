@@ -676,7 +676,7 @@ function buildEffectAvailability(
         ? {
             enabled: true,
             available: false,
-            reason: analytics?.semanticRegions.reason ?? "Waiting for semantic region summaries",
+            reason: analytics?.semanticRegions.reason ?? "正在汇总对象类型区域",
           }
         : { enabled: true, available: true, reason: analytics.semanticRegions.reason };
 

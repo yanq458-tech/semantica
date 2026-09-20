@@ -515,7 +515,7 @@ export function useLoadGraph(options: UseLoadGraphOptions = {}) {
         nodesTotal: fetchedNodes.length,
         edgesLoaded: fetchedEdges.length,
         edgesTotal: fetchedEdges.length,
-        message: "Applying semantic color, sizing, and structural styling",
+        message: "正在应用对象类型配色、尺寸和结构样式",
       }));
 
       const colorAccessor = chooseColorAccessor(draftAttributes);

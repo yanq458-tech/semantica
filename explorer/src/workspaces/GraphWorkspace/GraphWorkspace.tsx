@@ -1938,7 +1938,7 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
         scores: EMPTY_DISTANCE_RECORD,
         count: 0,
         status: distanceMode === "semantic" ? "unavailable" : "idle",
-        error: distanceMode === "semantic" ? "Select a Full Graph node to load semantic distance." : null,
+        error: distanceMode === "semantic" ? "请在完整组织体视图中选择对象以加载关联距离。" : null,
       });
       return;
     }
@@ -1966,10 +1966,10 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
         }
         if (!response.ok) {
           throw new Error(response.status === 503
-            ? "Semantic similarity is unavailable for this graph."
+            ? "当前组织体数据暂不支持关联相似度分析。"
             : response.status === 404
-              ? "Selected node was not found by the semantic distance API."
-            : `Semantic distance failed with status ${response.status}`);
+              ? "关联距离服务中未找到所选对象。"
+            : `关联距离加载失败，状态码 ${response.status}`);
         }
 
         const data: SemanticNeighborhoodResponse = await response.json();
@@ -1985,7 +1985,7 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
           scores,
           count: Object.keys(scores).length,
           status: Object.keys(scores).length > 0 ? "ready" : "unavailable",
-          error: Object.keys(scores).length > 0 ? null : "No semantic neighbors were returned for this node.",
+          error: Object.keys(scores).length > 0 ? null : "未找到与该对象相关的相似对象。",
         });
       } catch (error) {
         if (cancelled) {
@@ -1996,7 +1996,7 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
           scores: EMPTY_DISTANCE_RECORD,
           count: 0,
           status: "error",
-          error: error instanceof Error ? error.message : "Semantic distance could not be loaded.",
+          error: error instanceof Error ? error.message : "无法加载关联距离。",
         });
       }
     };
@@ -2839,8 +2839,8 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
       },
       {
         id: "dist-semantic",
-        label: "Semantic",
-        title: "Color edges by semantic similarity to selected node",
+        label: "关联相似度",
+        title: "按所选对象的关联相似度显示关系颜色",
         active: distanceMode === "semantic",
         onClick: () => {
           setEgoModeEnabled(false);
@@ -3039,8 +3039,8 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
                     {distanceVisualState.mode === "semantic" ? (
                       <span>
                         {distanceVisualState.status === "loading"
-                          ? "Loading semantic neighborhood..."
-                          : `${distanceVisualState.semanticNeighborCount ?? 0} semantic neighbors`}
+                          ? "正在加载相似对象..."
+                          : `${distanceVisualState.semanticNeighborCount ?? 0} 个相似对象`}
                       </span>
                     ) : distanceVisualState.mode === "heatmap" ? (
                       <span>{heatmapDistanceSummary}</span>

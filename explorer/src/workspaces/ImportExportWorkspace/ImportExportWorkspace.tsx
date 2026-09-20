@@ -58,12 +58,12 @@ export function ImportExportWorkspace() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `semantica_export.${exportFormat}`;
+      a.download = `coe_export.${exportFormat}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast("success", `Export ready — semantica_export.${exportFormat}`);
+      showToast("success", `导出已就绪 — coe_export.${exportFormat}`);
       logEvent("export", `Exported graph as ${exportFormat.toUpperCase()}`, { format: exportFormat });
     } catch (e: unknown) {
       showToast("error", e instanceof Error ? e.message : "Export failed");
@@ -165,7 +165,7 @@ export function ImportExportWorkspace() {
               <div style={{ color: "var(--ws-text-muted)", fontWeight: 700, fontSize: 12, marginBottom: 6 }}>What's included</div>
               <div className="ws-body" style={{ fontSize: 12 }}>
                 {exportFormat === "json"
-                  ? "Full graph snapshot: all node properties, edge weights, entity metadata and semantic groups in a standardized JSON payload."
+                  ? "完整组织体快照：以标准 JSON 载荷导出对象属性、关系权重、实体元数据和对象分组。"
                   : "Flattened CSV: nodes and edges as rows. Complex nested properties are stringified. Best for spreadsheet analysis."}
               </div>
             </div>

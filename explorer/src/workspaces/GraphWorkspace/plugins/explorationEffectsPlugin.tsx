@@ -38,8 +38,8 @@ const EFFECT_ROWS: EffectRowConfig[] = [
   },
   {
     key: "legendEnabled",
-    label: "Semantic Legend",
-    description: "Compact semantic group legend for graph orientation.",
+    label: "对象类型图例",
+    description: "用紧凑图例说明组织体对象分组。",
   },
 ];
 
@@ -171,7 +171,7 @@ export const explorationEffectsPlugin: GraphPlugin = {
 
           {effectsState.legendEnabled ? (
             <div style={sectionStyle}>
-              <div style={sectionTitleStyle}>Semantic legend</div>
+              <div style={sectionTitleStyle}>对象类型图例</div>
               {legendItems.length ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {legendItems.map((item) => (

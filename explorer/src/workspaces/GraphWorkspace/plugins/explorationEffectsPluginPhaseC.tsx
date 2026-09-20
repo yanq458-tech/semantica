@@ -39,8 +39,8 @@ const SCENE_EFFECT_ROWS: EffectRowConfig[] = [
   },
   {
     key: "semanticRegionsEnabled",
-    label: "Semantic Regions",
-    description: "Quiet semantic hulls around the strongest visible topic clusters.",
+    label: "对象类型区域",
+    description: "标识当前视图中主要对象分组的边界。",
   },
   {
     key: "contoursEnabled",
@@ -178,7 +178,7 @@ function renderRegionsAndSignals(
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {semanticRegions.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Semantic regions</div>
+          <div style={subsectionTitleStyle}>对象类型区域</div>
           {semanticRegions.map((region) => (
             <div key={region.semanticGroup} style={legendRowStyle}>
               <span
@@ -253,7 +253,7 @@ function renderRegionsAndSignals(
 
       {!semanticRegions.length && !communities.length && !centrality.length && fallbackLegendItems.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Fallback semantic legend</div>
+          <div style={subsectionTitleStyle}>备用对象类型图例</div>
           {fallbackLegendItems.map((item) => (
             <div key={item.group} style={legendRowStyle}>
               <span
