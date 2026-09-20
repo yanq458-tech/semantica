@@ -5,7 +5,6 @@ import {
   BrainCircuit,
   Bot,
   Database,
-  FileSearch,
   FileText,
   GitBranchPlus,
   GitMerge,
@@ -94,7 +93,6 @@ const navItems: NavItem[] = [
   { id: 'explore', label: '复杂组织体', hint: '组织体结构、关系与对象浏览', icon: Database },
   { id: 'agents', label: '智能体中心', hint: '智能体配置、状态、任务与执行记录', icon: Bot },
   { id: 'ontology-hub', label: '模型与规则', hint: '组织体模型、规则、约束与版本', icon: GitMerge },
-  { id: 'analyze', label: '组织体分析', hint: '组织关系查询、规则推演与数据检查', icon: FileSearch },
   { id: 'scenarios', label: '场景推演', hint: '场景定义、变化、验证和推演流程', icon: Route },
   { id: 'optimization', label: '优化决策', hint: '场景校验、优化运行与候选方案比较', icon: Radar },
   { id: 'decisions', label: '决策分析', hint: '决策依据、影响路径与证据链', icon: Scale },
@@ -1570,6 +1568,10 @@ function WelcomeScreen({
   onOpenImport,
   onOpenDecisions,
   onOpenManage,
+  onOpenAgents,
+  onOpenScenarios,
+  onOpenOptimization,
+  onOpenReports,
 }: {
   onOpenNetwork: () => void;
   onOpenVocabulary: () => void;
@@ -1577,6 +1579,10 @@ function WelcomeScreen({
   onOpenImport: () => void;
   onOpenDecisions: () => void;
   onOpenManage: () => void;
+  onOpenAgents: () => void;
+  onOpenScenarios: () => void;
+  onOpenOptimization: () => void;
+  onOpenReports: () => void;
 }) {
   const [stats, setStats] = useState<{ nodes: number | null; edges: number | null; status: ConnectionStatus }>({
     nodes: null,
@@ -1621,6 +1627,12 @@ function WelcomeScreen({
 
   const secondaryLaunchers: LandingAction[] = [
     {
+      label: '智能体中心',
+      description: '配置与协同状态',
+      icon: Bot,
+      onClick: onOpenAgents,
+    },
+    {
       label: '模型术语',
       description: '浏览组织体概念与术语',
       icon: Database,
@@ -1633,10 +1645,28 @@ function WelcomeScreen({
       onClick: onOpenReasoning,
     },
     {
+      label: '场景推演',
+      description: '变化、验证与推演流程',
+      icon: Route,
+      onClick: onOpenScenarios,
+    },
+    {
+      label: '优化决策',
+      description: '模型求解与候选方案',
+      icon: Radar,
+      onClick: onOpenOptimization,
+    },
+    {
       label: '决策分析',
       description: '依据、影响与证据链',
       icon: Scale,
       onClick: onOpenDecisions,
+    },
+    {
+      label: '报告中心',
+      description: '汇总、预览与导出',
+      icon: FileText,
+      onClick: onOpenReports,
     },
     {
       label: '数据与知识',
@@ -1870,6 +1900,10 @@ export default function App() {
           }}
           onOpenDecisions={() => setActiveWorkspace('decisions')}
           onOpenManage={() => setActiveWorkspace('manage')}
+          onOpenAgents={() => setActiveWorkspace('agents')}
+          onOpenScenarios={() => setActiveWorkspace('scenarios')}
+          onOpenOptimization={() => setActiveWorkspace('optimization')}
+          onOpenReports={() => setActiveWorkspace('reports')}
         />
       );
     }
