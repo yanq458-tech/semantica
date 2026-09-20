@@ -12,6 +12,7 @@ import { SolutionKpiPanel } from './components/SolutionKpiPanel';
 import { ModelDefinitionPanel } from './components/ModelDefinitionPanel';
 import type { DisturbanceKind, ScenarioRequest } from './types';
 import './OptimizationWorkspace.css';
+import { ACTIVE_DOMAIN_PACK } from '../../domains';
 
 const BASELINE: ScenarioRequest = { baseScenarioId: 'Scenario_A', changes: [] };
 
@@ -24,19 +25,19 @@ export function OptimizationWorkspace() {
   const [rightSolution, setRightSolution] = useState('');
   const [traceAssignment, setTraceAssignment] = useState('');
 
-  const scenarioQuery = useQuery({ queryKey: ['railway-scenario', appliedRequest], queryFn: () => validateScenario(appliedRequest), retry: false });
+  const scenarioQuery = useQuery({ queryKey: [ACTIVE_DOMAIN_PACK.id, 'scenario', appliedRequest], queryFn: () => validateScenario(appliedRequest), retry: false });
   const runMutation = useMutation({ mutationFn: startOptimization, onSuccess: (run) => { setRunId(run.runId); setSelectedSolution(''); } });
-  const runQuery = useQuery({ queryKey: ['railway-run', runId], queryFn: () => loadRun(runId), enabled: Boolean(runId), refetchInterval: (query) => { const status = query.state.data?.lifecycleStatus; return status && !['completed', 'failed'].includes(status) ? 1000 : false; } });
+  const runQuery = useQuery({ queryKey: [ACTIVE_DOMAIN_PACK.id, 'run', runId], queryFn: () => loadRun(runId), enabled: Boolean(runId), refetchInterval: (query) => { const status = query.state.data?.lifecycleStatus; return status && !['completed', 'failed'].includes(status) ? 1000 : false; } });
   const completed = runQuery.data?.lifecycleStatus === 'completed';
-  const solutionsQuery = useQuery({ queryKey: ['railway-solutions', runId], queryFn: () => loadSolutions(runId), enabled: completed });
+  const solutionsQuery = useQuery({ queryKey: [ACTIVE_DOMAIN_PACK.id, 'solutions', runId], queryFn: () => loadSolutions(runId), enabled: completed });
   const solutions = solutionsQuery.data ?? [];
   const activeSolution = selectedSolution || solutions[0]?.solutionId || '';
   const activeLeft = leftSolution || solutions[0]?.solutionId || '';
   const activeRight = rightSolution || solutions[1]?.solutionId || '';
 
-  const assignmentsQuery = useQuery({ queryKey: ['railway-assignments', activeSolution], queryFn: () => loadAssignments(activeSolution), enabled: Boolean(activeSolution) });
-  const comparisonQuery = useQuery({ queryKey: ['railway-comparison', activeLeft, activeRight], queryFn: () => compareSolutions(activeLeft, activeRight), enabled: Boolean(activeLeft && activeRight && activeLeft !== activeRight) });
-  const explanationQuery = useQuery({ queryKey: ['railway-explanation', traceAssignment], queryFn: () => loadExplanation(traceAssignment), enabled: Boolean(traceAssignment) });
+  const assignmentsQuery = useQuery({ queryKey: [ACTIVE_DOMAIN_PACK.id, 'assignments', activeSolution], queryFn: () => loadAssignments(activeSolution), enabled: Boolean(activeSolution) });
+  const comparisonQuery = useQuery({ queryKey: [ACTIVE_DOMAIN_PACK.id, 'comparison', activeLeft, activeRight], queryFn: () => compareSolutions(activeLeft, activeRight), enabled: Boolean(activeLeft && activeRight && activeLeft !== activeRight) });
+  const explanationQuery = useQuery({ queryKey: [ACTIVE_DOMAIN_PACK.id, 'explanation', traceAssignment], queryFn: () => loadExplanation(traceAssignment), enabled: Boolean(traceAssignment) });
 
   const error = scenarioQuery.error ?? runMutation.error ?? runQuery.error ?? solutionsQuery.error ?? assignmentsQuery.error;
   return <div className="opt-workspace">
@@ -45,7 +46,7 @@ export function OptimizationWorkspace() {
       <DisturbanceEditor kind={kind} onKindChange={setKind} onApply={setAppliedRequest} busy={scenarioQuery.isFetching} />
     </div>
     <main className="opt-main">
-      <div className="opt-heading"><div className="opt-heading-icon"><Boxes size={20} /></div><div><div className="ws-eyebrow">Verified-MBSE Railway</div><h2>铁路优化与情景推演</h2></div></div>
+      <div className="opt-heading"><div className="opt-heading-icon"><Boxes size={20} /></div><div><div className="ws-eyebrow">Verified-MBSE · 当前 Domain Pack：{ACTIVE_DOMAIN_PACK.name}</div><h2>优化决策工作台</h2></div></div>
       {error && <div className="opt-error">{error instanceof Error ? error.message : '请求失败'}</div>}
       <ModelDefinitionPanel run={runQuery.data ?? runMutation.data} />
       <RunStatusPanel run={runQuery.data ?? runMutation.data} onRun={() => runMutation.mutate(appliedRequest)} disabled={!scenarioQuery.data?.validation.conforms || runMutation.isPending} />

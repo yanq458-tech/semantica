@@ -7,4 +7,9 @@ export interface ScenarioRecord {
   effectiveDigest: string;
   changes: Array<Record<string, unknown>>;
   validation: { conforms: boolean; violationCount: number; messages: string[] };
+  domainPackId: string;
+  domainName: string;
+  scenarioType: string;
+  businessObjective: string;
+  provider: string;
 }

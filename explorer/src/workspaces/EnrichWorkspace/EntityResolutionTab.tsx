@@ -227,7 +227,7 @@ export function EntityResolutionTab() {
           <ScanSearch size={18} color="#f2b66d" />
           <div>
             <div style={{ color: "#ebf3ff", fontSize: 16, fontWeight: 700 }}>Entity Resolution</div>
-            <div style={{ color: "#8b949e", fontSize: 12 }}>Detect and merge duplicate entities in the knowledge graph</div>
+            <div style={{ color: "#8b949e", fontSize: 12 }}>识别并合并复杂组织体数据中的重复实体</div>
           </div>
         </div>
       </div>

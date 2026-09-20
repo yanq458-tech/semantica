@@ -93,7 +93,7 @@ const navItems: NavItem[] = [
   { id: 'explore', label: '复杂组织体', hint: '组织体结构、关系与对象浏览', icon: Database },
   { id: 'agents', label: '智能体中心', hint: '智能体配置、状态、任务与执行记录', icon: Bot },
   { id: 'ontology-hub', label: '模型与规则', hint: '组织体模型、规则、约束与版本', icon: GitMerge },
-  { id: 'scenarios', label: '场景推演', hint: '场景定义、变化、验证和推演流程', icon: Route },
+  { id: 'scenarios', label: '场景与推演', hint: '场景定义、变化、验证和推演流程', icon: Route },
   { id: 'optimization', label: '优化决策', hint: '场景校验、优化运行与候选方案比较', icon: Radar },
   { id: 'decisions', label: '决策分析', hint: '决策依据、影响路径与证据链', icon: Scale },
   { id: 'reports', label: '报告中心', hint: '报告列表、生成、预览与导出', icon: FileText },
@@ -1645,7 +1645,7 @@ function WelcomeScreen({
       onClick: onOpenReasoning,
     },
     {
-      label: '场景推演',
+      label: '场景与推演',
       description: '变化、验证与推演流程',
       icon: Route,
       onClick: onOpenScenarios,
@@ -1945,7 +1945,7 @@ export default function App() {
     }
 
     if (activeWorkspace === 'scenarios') {
-      return <WorkspaceShell title="场景推演" subtitle="管理与基础事实分离的业务场景，并进入验证和优化流程。" kicker="Scenario Workspace" compact><ErrorBoundary key="scenarios"><Suspense fallback={<WorkspaceFallback />}><ScenarioWorkspace onOpenOptimization={() => setActiveWorkspace('optimization')} /></Suspense></ErrorBoundary></WorkspaceShell>;
+      return <WorkspaceShell title="场景与推演" subtitle="管理与基础事实分离的业务场景，并进入验证、推演和优化流程。" kicker="Scenario Workspace" compact><ErrorBoundary key="scenarios"><Suspense fallback={<WorkspaceFallback />}><ScenarioWorkspace onOpenOptimization={() => setActiveWorkspace('optimization')} /></Suspense></ErrorBoundary></WorkspaceShell>;
     }
 
     if (activeWorkspace === 'analyze') {
@@ -1998,8 +1998,8 @@ export default function App() {
       return (
         <WorkspaceShell
           title="优化决策"
-          subtitle="验证铁路扰动场景，运行资源分配模型并检查可追溯候选方案。"
-          kicker="铁路开行验证场景"
+          subtitle="定义优化问题，运行领域求解器并检查可追溯候选方案。"
+          kicker="Optimization Workspace"
           compact
         >
           <ErrorBoundary key="optimization">

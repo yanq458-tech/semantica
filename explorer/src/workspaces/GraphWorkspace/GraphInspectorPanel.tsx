@@ -402,7 +402,7 @@ export function GraphInspectorPanel({
             <span style={subtleChipStyle}>temporal</span>
           ) : null}
           {attribution.length ? <span style={subtleChipStyle}>{attribution.length} source fields</span> : null}
-          {predictions.length ? <span style={subtleChipStyle}>{predictions.length} candidate links</span> : null}
+          {predictions.length ? <span style={subtleChipStyle}>{predictions.length} 条候选关系</span> : null}
         </div>
       </div>
 
@@ -444,10 +444,10 @@ export function GraphInspectorPanel({
           </button>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button style={secondaryActionButtonStyle} onClick={() => onDownloadProvenance("json")} disabled={!actionNodeId}>
-              Provenance JSON
+              来源与追溯 JSON
             </button>
             <button style={secondaryActionButtonStyle} onClick={() => onDownloadProvenance("markdown")} disabled={!actionNodeId}>
-              Provenance MD
+              来源与追溯 MD
             </button>
           </div>
         </div>
@@ -468,7 +468,7 @@ export function GraphInspectorPanel({
           placeholder="Target node ID"
           style={inputStyle}
         />
-        <button style={actionButtonStyle} onClick={onTracePath} disabled={!actionNodeId}>Trace Causal Path</button>
+        <button style={actionButtonStyle} onClick={onTracePath} disabled={!actionNodeId}>影响路径分析</button>
 
         {pathResult?.path?.length ? (
           <>
@@ -490,7 +490,7 @@ export function GraphInspectorPanel({
 
       {/* Candidate Links */}
       <details className="node-panel-collapse" open={predictions.length > 0}>
-        <summary className="node-panel-summary">Candidate Links</summary>
+        <summary className="node-panel-summary">关系发现</summary>
         <div className="node-panel-body">
           {predictions.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -525,7 +525,7 @@ export function GraphInspectorPanel({
           ) : isRunningPredictions ? (
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: 8, color: "#8b949e", fontSize: 12 }}>
               <Loader2 size={13} className="animate-spin" />
-              <span>Computing candidate links…</span>
+              <span>正在计算候选关系…</span>
             </div>
           ) : (
             <div style={emptyTextStyle}>Run link prediction to surface likely next-hop relationships.</div>
@@ -535,7 +535,7 @@ export function GraphInspectorPanel({
 
       {/* Source Attribution */}
       <details className="node-panel-collapse">
-        <summary className="node-panel-summary">Source Attribution</summary>
+        <summary className="node-panel-summary">来源分析</summary>
         <div className="node-panel-body">
           {attribution.length ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
