@@ -1621,7 +1621,7 @@ function WelcomeScreen({
   const metrics: LandingMetric[] = [
     { label: '组织体对象', value: formatMetric(stats.nodes, '实时'), tone: 'cyan' },
     { label: '组织关系', value: formatMetric(stats.edges, '就绪'), tone: 'mint' },
-    { label: '结构视图', value: '3', tone: 'amber' },
+    { label: '已启用领域包', value: '1', tone: 'amber' },
     { label: isOnline ? '数据服务' : '等待连接', value: isOnline ? '运行中' : '待机', tone: 'rose' },
   ];
 
@@ -1783,7 +1783,7 @@ function WelcomeScreen({
               </svg>
             </div>
             <div className="landing-dossier-card">
-              <div className="landing-dossier-kicker">对象档案</div>
+              <div className="landing-dossier-kicker">当前领域案例 · 铁路</div>
               <div className="landing-dossier-title">G101</div>
               <div className="landing-dossier-row"><span>对象类型</span><strong>开行任务</strong></div>
               <div className="landing-dossier-row"><span>约束状态</span><strong>已验证</strong></div>

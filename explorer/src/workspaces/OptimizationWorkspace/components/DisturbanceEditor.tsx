@@ -1,14 +1,8 @@
 import type { DisturbanceKind, ScenarioRequest } from '../types';
-
-function requestFor(kind: DisturbanceKind): ScenarioRequest {
-  if (kind === 'resource_unavailable') return { baseScenarioId: 'Scenario_A', changes: [{ type: kind, resourceId: 'EMU_001' }] };
-  if (kind === 'train_service_addition') return { baseScenarioId: 'Scenario_A', changes: [{ type: kind, trainNo: 'G102', requiredModel: 'CR400AF', departureTime: '2026-08-29T10:00:00', arrivalTime: '2026-08-29T11:20:00' }] };
-  if (kind === 'service_time_change') return { baseScenarioId: 'Scenario_A', changes: [{ type: kind, trainServiceId: 'SERVICE_G101', departureTime: '2026-08-29T08:30:00', arrivalTime: '2026-08-29T09:50:00' }] };
-  return { baseScenarioId: 'Scenario_A', changes: [] };
-}
+import { railwayScenarioRequest } from '../../../domains/railway';
 
 export function DisturbanceEditor({ kind, onKindChange, onApply, busy }: { kind: DisturbanceKind; onKindChange: (value: DisturbanceKind) => void; onApply: (request: ScenarioRequest) => void; busy: boolean }) {
-  const request = requestFor(kind);
+  const request: ScenarioRequest = railwayScenarioRequest(kind);
   const change = request.changes[0];
   return <section className="opt-card">
     <div className="opt-section-title">领域场景参数 <span className="ws-pill">铁路案例</span></div>

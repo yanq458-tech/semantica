@@ -3147,7 +3147,7 @@ export function GraphWorkspace({ externalFocusNodeId, externalFocusToken }: Grap
                       <MetricChip>{selectedEdgeState.dominantEdgeType}</MetricChip>
                     ) : null}
                     {selectedEdgeState.provenanceCount > 0 ? (
-                      <MetricChip>{selectedEdgeState.provenanceCount} provenance fields</MetricChip>
+                      <MetricChip>{selectedEdgeState.provenanceCount} 个来源字段</MetricChip>
                     ) : null}
                   </div>
 

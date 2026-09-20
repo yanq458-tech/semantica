@@ -1,14 +1,7 @@
-export type DisturbanceKind = 'baseline' | 'resource_unavailable' | 'train_service_addition' | 'service_time_change';
-
-export type ScenarioChange =
-  | { type: 'resource_unavailable'; resourceId: string }
-  | { type: 'train_service_addition'; trainNo: string; requiredModel: string; departureTime: string; arrivalTime: string }
-  | { type: 'service_time_change'; trainServiceId: string; departureTime: string; arrivalTime: string };
-
-export interface ScenarioRequest {
-  baseScenarioId: 'Scenario_A';
-  changes: ScenarioChange[];
-}
+import type { RailwayDisturbanceKind, RailwayScenarioChange, RailwayScenarioRequest } from '../../domains/railway/types';
+export type DisturbanceKind = RailwayDisturbanceKind;
+export type ScenarioChange = RailwayScenarioChange;
+export type ScenarioRequest = RailwayScenarioRequest;
 
 export interface ScenarioSummary {
   scenarioId: string;

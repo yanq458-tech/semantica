@@ -1,5 +1,6 @@
-import type { AssignmentExplanation, AssignmentRow, MetricName, OptimizationRun, ScenarioChange, ScenarioRequest, ScenarioSummary, Solution, SolutionComparison } from './types';
+import type { AssignmentExplanation, AssignmentRow, MetricName, OptimizationRun, ScenarioRequest, ScenarioSummary, Solution, SolutionComparison } from './types';
 import { ACTIVE_DOMAIN_PACK } from '../../domains';
+import { railwayScenarioRequestBody } from '../../domains/railway';
 
 const API_BASE = ACTIVE_DOMAIN_PACK.apiBase ?? '';
 
@@ -10,14 +11,8 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-function changeToWire(change: ScenarioChange): Record<string, unknown> {
-  if (change.type === 'resource_unavailable') return { type: change.type, resource_id: change.resourceId };
-  if (change.type === 'train_service_addition') return { type: change.type, train_no: change.trainNo, required_model: change.requiredModel, departure_time: change.departureTime, arrival_time: change.arrivalTime };
-  return { type: change.type, train_service_id: change.trainServiceId, departure_time: change.departureTime, arrival_time: change.arrivalTime };
-}
-
 function requestBody(value: ScenarioRequest) {
-  return JSON.stringify({ base_scenario_id: value.baseScenarioId, changes: value.changes.map(changeToWire) });
+  return railwayScenarioRequestBody(value);
 }
 
 export function validateScenario(value: ScenarioRequest): Promise<ScenarioSummary> {
