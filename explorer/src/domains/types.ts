@@ -8,6 +8,9 @@ export interface DomainPack {
   relationTypes: string[];
   scenarioTypes: string[];
   capabilities: string[];
+  causalVariableTypes?: string[];
+  mechanismTypes?: string[];
+  scenarioTemplates?: string[];
   apiBase?: string;
   labels: Record<string, string>;
 }
