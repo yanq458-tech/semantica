@@ -1946,7 +1946,7 @@ export default function App() {
         >
           <ErrorBoundary key="decisions">
             <Suspense fallback={<WorkspaceFallback />}>
-              <DecisionWorkspace />
+              <DecisionWorkspace onOpenOptimization={() => setActiveWorkspace('optimization')} />
             </Suspense>
           </ErrorBoundary>
         </WorkspaceShell>
