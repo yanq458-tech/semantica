@@ -9,6 +9,7 @@ import { RunStatusPanel } from './components/RunStatusPanel';
 import { ScenarioPanel } from './components/ScenarioPanel';
 import { SolutionComparisonPanel } from './components/SolutionComparisonPanel';
 import { SolutionKpiPanel } from './components/SolutionKpiPanel';
+import { ModelDefinitionPanel } from './components/ModelDefinitionPanel';
 import type { DisturbanceKind, ScenarioRequest } from './types';
 import './OptimizationWorkspace.css';
 
@@ -46,6 +47,7 @@ export function OptimizationWorkspace() {
     <main className="opt-main">
       <div className="opt-heading"><div className="opt-heading-icon"><Boxes size={20} /></div><div><div className="ws-eyebrow">Verified-MBSE Railway</div><h2>铁路优化与情景推演</h2></div></div>
       {error && <div className="opt-error">{error instanceof Error ? error.message : '请求失败'}</div>}
+      <ModelDefinitionPanel run={runQuery.data ?? runMutation.data} />
       <RunStatusPanel run={runQuery.data ?? runMutation.data} onRun={() => runMutation.mutate(appliedRequest)} disabled={!scenarioQuery.data?.validation.conforms || runMutation.isPending} />
       <div className="opt-solution-toolbar"><span>当前 Solution</span><div className="opt-select-wrap"><select value={activeSolution} onChange={(event) => setSelectedSolution(event.target.value)} disabled={!solutions.length}>{solutions.map((solution) => <option key={solution.solutionId} value={solution.solutionId}>{solution.solutionId}</option>)}{!solutions.length && <option>暂无方案</option>}</select><ChevronDown size={13} /></div></div>
       <SolutionKpiPanel solution={solutions.find((item) => item.solutionId === activeSolution)} />
