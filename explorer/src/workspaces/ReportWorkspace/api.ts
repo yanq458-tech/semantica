@@ -12,25 +12,18 @@ async function readJson(url: string): Promise<unknown> {
 }
 
 export async function buildReportDraft(kind: ReportKind): Promise<ReportDraft> {
-  const [statsResult, scenariosResult, decisionsResult] = await Promise.allSettled([
-    readJson('/api/graph/stats'), readJson(`${ACTIVE_DOMAIN_PACK.apiBase}/scenarios`), readJson('/api/decisions'),
-  ]);
-  const stats = statsResult.status === 'fulfilled' ? statsResult.value as Record<string, unknown> : {};
-  const scenarioBody = scenariosResult.status === 'fulfilled' ? scenariosResult.value as { scenarios?: unknown[] } : {};
-  const decisions = decisionsResult.status === 'fulfilled' && Array.isArray(decisionsResult.value) ? decisionsResult.value : [];
+  const source = await readJson(`${ACTIVE_DOMAIN_PACK.apiBase}/reports/analysis?scenario_id=Scenario_A`) as { sections: Array<{ title: string; facts: unknown }>; evidence_refs: string[]; provenance_refs: string[] };
   const now = new Date();
   return {
     id: `report-${now.toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)}`,
     kind, name: REPORT_NAMES[kind], generatedAt: now.toISOString(), status: 'session-draft',
     sections: [
-      { title: '组织体概览', lines: [`对象数量：${stats.node_count ?? stats.nodes ?? '未返回'}`, `关系数量：${stats.edge_count ?? stats.edges ?? '未返回'}`, `当前领域包：${ACTIVE_DOMAIN_PACK.name} v${ACTIVE_DOMAIN_PACK.version}`, `领域状态：${ACTIVE_DOMAIN_PACK.status === 'enabled' ? '已启用' : '规划中'}`] },
-      { title: '场景与决策', lines: [`可用场景：${scenarioBody.scenarios?.length ?? '未返回'}`, `决策记录：${decisions.length}`, '运行结果：报告中心尚未提供 OptimizationRun 列表接口，不在此推断'] },
-      { title: '智能体执行情况', lines: ['业务智能体后端尚未接入，本报告没有智能体执行结果。'] },
-      { title: '来源与限制', lines: [`数据来源：当前 ContextGraph、${ACTIVE_DOMAIN_PACK.name} Scenario Provider、Decision API`, '状态：浏览器当前会话草案，尚未持久化', '结论仅汇总可验证事实，不宣称候选方案已被自动证明为全局最优。'] },
+      ...source.sections.map((section) => ({ title: section.title, facts: section.facts, lines: [] })),
+      { title: '来源与限制', lines: [`Evidence：${source.evidence_refs.join(', ') || '不可用'}`, `Provenance：${source.provenance_refs.join(', ') || '不可用'}`, `当前领域包：${ACTIVE_DOMAIN_PACK.name} v${ACTIVE_DOMAIN_PACK.version}`, '状态：只读结构化报告预览；不宣称自主决策或严格反事实推断。'] },
     ],
   };
 }
 
 export function reportMarkdown(report: ReportDraft): string {
-  return [`# ${report.name}`, '', `- 报告编号：${report.id}`, `- 生成时间：${report.generatedAt}`, '- 状态：当前会话草案', '', ...report.sections.flatMap((section) => [`## ${section.title}`, '', ...section.lines.map((line) => `- ${line}`), ''])].join('\n');
+  return [`# ${report.name}`, '', `- 报告编号：${report.id}`, `- 生成时间：${report.generatedAt}`, '- 状态：当前会话草案', '', ...report.sections.flatMap((section) => [`## ${section.title}`, '', ...section.lines.map((line) => `- ${line}`), ...(section.facts === undefined ? [] : ['```json', JSON.stringify(section.facts, null, 2), '```']), ''])].join('\n');
 }
