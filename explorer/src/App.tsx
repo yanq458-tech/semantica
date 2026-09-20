@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   ArrowRight,
   BrainCircuit,
+  Bot,
   Database,
   FileSearch,
   GitBranchPlus,
@@ -32,8 +33,9 @@ const KGOverviewTab = lazy(() => import('./workspaces/ManageWorkspace/KGOverview
 const OntologySummaryTab = lazy(() => import('./workspaces/ManageWorkspace/OntologySummaryTab').then((module) => ({ default: module.OntologySummaryTab })));
 const OntologyWorkspace = lazy(() => import('./workspaces/OntologyWorkspace').then((module) => ({ default: module.OntologyWorkspace })));
 const OptimizationWorkspace = lazy(() => import('./workspaces/OptimizationWorkspace').then((module) => ({ default: module.OptimizationWorkspace })));
+const AgentWorkspace = lazy(() => import('./workspaces/AgentWorkspace').then((module) => ({ default: module.AgentWorkspace })));
 
-type WorkspaceId = 'welcome' | 'explore' | 'analyze' | 'optimization' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
+type WorkspaceId = 'welcome' | 'explore' | 'agents' | 'analyze' | 'optimization' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
 type ExploreView = 'graph' | 'vocabulary';
 type AnalyzeView = 'sparql' | 'reasoning';
 type EnrichView = 'import' | 'merge' | 'registry' | 'resolve';
@@ -87,6 +89,7 @@ const PREVIEW_DOTS = Array.from({ length: 42 }, (_, i) => ({
 
 const navItems: NavItem[] = [
   { id: 'explore', label: '复杂组织体', hint: '组织体结构、关系与对象浏览', icon: Database },
+  { id: 'agents', label: '智能体中心', hint: '智能体配置、状态、任务与执行记录', icon: Bot },
   { id: 'ontology-hub', label: '模型与规则', hint: '组织体模型、规则、约束与版本', icon: GitMerge },
   { id: 'analyze', label: '组织体分析', hint: '组织关系查询、规则推演与数据检查', icon: FileSearch },
   { id: 'optimization', label: '优化决策', hint: '场景校验、优化运行与候选方案比较', icon: Radar },
@@ -1896,6 +1899,10 @@ export default function App() {
           </ErrorBoundary>
         </WorkspaceShell>
       );
+    }
+
+    if (activeWorkspace === 'agents') {
+      return <WorkspaceShell title="智能体中心" subtitle="配置面向建模、验证、推演、优化、决策和报告的业务智能体。" kicker="Agent Center" compact><ErrorBoundary key="agents"><Suspense fallback={<WorkspaceFallback />}><AgentWorkspace /></Suspense></ErrorBoundary></WorkspaceShell>;
     }
 
     if (activeWorkspace === 'analyze') {
