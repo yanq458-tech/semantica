@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Scale, Search, ArrowRight, Info, GitCompareArrows, ShieldCheck, Waypoints } from "lucide-react";
+import { CausalAnalysisPanel } from './CausalAnalysisPanel';
 
 type OutcomeKind = "approved" | "rejected" | "deferred" | "pending" | string;
 
@@ -285,7 +286,7 @@ export function DecisionWorkspace({ onOpenOptimization }: { onOpenOptimization?:
                   <span className="ws-pill ws-pill--accent" style={{ marginLeft: "auto" }}>{chain.length} step{chain.length !== 1 ? "s" : ""}</span>
                 )}
               </div>
-              <CausalFlow chain={chain} loading={chainLoading} />
+              <CausalAnalysisPanel decisionId={selected.decision_id} legacyFallback={<CausalFlow chain={chain} loading={chainLoading} />} />
             </div>
             <div className="ws-card" style={{ padding: 18, marginTop: 16 }}><div style={{ fontSize: 13, fontWeight: 800, marginBottom: 8 }}>方案解释</div><p style={{ margin: 0, color: "var(--ws-text-muted)", fontSize: 11, lineHeight: 1.7 }}>该记录的结论为“{selected.outcome ?? '未标注'}”。系统当前仅依据已返回的 {chain.length} 个证据链步骤展示来源与影响关系；若需要判断“为什么选择某个资源”或比较 KPI，请进入优化决策查看 Assignment 解释与候选 Solution 对比。此说明由确定性模板生成，不使用 LLM。</p></div>
           </div>
