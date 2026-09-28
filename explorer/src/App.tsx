@@ -2,9 +2,10 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   ArrowRight,
+  Bot,
   BrainCircuit,
   Database,
-  FileSearch,
+  FileText,
   GitBranchPlus,
   GitMerge,
   Network,
@@ -35,8 +36,12 @@ const EntityResolutionTab = lazy(() => import('./workspaces/EnrichWorkspace/Enti
 const KGOverviewTab = lazy(() => import('./workspaces/ManageWorkspace/KGOverviewTab').then((module) => ({ default: module.KGOverviewTab })));
 const OntologySummaryTab = lazy(() => import('./workspaces/ManageWorkspace/OntologySummaryTab').then((module) => ({ default: module.OntologySummaryTab })));
 const OntologyWorkspace = lazy(() => import('./workspaces/OntologyWorkspace').then((module) => ({ default: module.OntologyWorkspace })));
+const OptimizationWorkspace = lazy(() => import('./workspaces/OptimizationWorkspace').then((module) => ({ default: module.OptimizationWorkspace })));
+const AgentWorkspace = lazy(() => import('./workspaces/AgentWorkspace').then((module) => ({ default: module.AgentWorkspace })));
+const ScenarioWorkspace = lazy(() => import('./workspaces/ScenarioWorkspace').then((module) => ({ default: module.ScenarioWorkspace })));
+const ReportWorkspace = lazy(() => import('./workspaces/ReportWorkspace').then((module) => ({ default: module.ReportWorkspace })));
 
-type WorkspaceId = 'welcome' | 'explore' | 'analyze' | 'decisions' | 'enrich' | 'manage' | 'ontology-hub';
+type WorkspaceId = 'welcome' | 'explore' | 'agents' | 'analyze' | 'scenarios' | 'optimization' | 'decisions' | 'reports' | 'enrich' | 'manage' | 'ontology-hub';
 type AnalyzeView = 'sparql' | 'reasoning';
 type EnrichView = 'import' | 'merge' | 'registry' | 'resolve';
 type ManageView = 'lineage' | 'kg-overview' | 'ontology';
@@ -73,9 +78,9 @@ type GraphStatsPayload = {
 type ConnectionStatus = 'checking' | 'online' | 'offline';
 
 const CONNECTION_STATUS_LABEL: Record<ConnectionStatus, string> = {
-  checking: 'Connecting…',
-  online: 'System Online',
-  offline: 'Backend Unreachable',
+  checking: '正在连接…',
+  online: '系统在线',
+  offline: '后端暂不可用',
 };
 
 const queryClient = new QueryClient();
@@ -88,12 +93,15 @@ const PREVIEW_DOTS = Array.from({ length: 42 }, (_, i) => ({
 }));
 
 const navItems: NavItem[] = [
-  { id: 'explore', label: 'Knowledge Explorer', hint: 'Graph and vocabulary browsing', icon: Database },
-  { id: 'analyze', label: 'Analyze', hint: 'Query and inspect the dataset', icon: FileSearch },
-  { id: 'decisions', label: 'Decisions', hint: 'Decision chains and precedent review', icon: Scale },
-  { id: 'enrich', label: 'Enrich', hint: 'Import, export, and merge workflows', icon: GitBranchPlus },
-  { id: 'manage', label: 'Manage', hint: 'Lineage and governance tooling', icon: Settings2 },
-  { id: 'ontology-hub', label: 'Ontology Hub', hint: 'Schema governance, registry, and vocabulary management', icon: GitMerge },
+  { id: 'explore', label: '复杂组织体', hint: '组织体结构、关系与对象浏览', icon: Database },
+  { id: 'agents', label: '智能体中心', hint: '智能体能力、状态与只读分析', icon: Bot },
+  { id: 'ontology-hub', label: '模型与规则', hint: '组织体模型、规则、约束与版本', icon: GitMerge },
+  { id: 'scenarios', label: '场景与推演', hint: '场景定义、变化、验证和推演流程', icon: Route },
+  { id: 'optimization', label: '优化决策', hint: '场景校验、优化运行与候选方案比较', icon: Radar },
+  { id: 'decisions', label: '决策分析', hint: '决策依据、影响路径与证据链', icon: Scale },
+  { id: 'reports', label: '报告中心', hint: '报告生成、预览与结构化导出', icon: FileText },
+  { id: 'enrich', label: '数据与知识', hint: '数据导入、对齐、合并与登记', icon: GitBranchPlus },
+  { id: 'manage', label: '系统管理', hint: '来源追溯、模型概览与治理', icon: Settings2 },
 ];
 
 function readInitialWorkspace(): WorkspaceId {
@@ -1516,6 +1524,10 @@ function WelcomeScreen({
   onOpenImport,
   onOpenDecisions,
   onOpenManage,
+  onOpenAgents,
+  onOpenScenarios,
+  onOpenOptimization,
+  onOpenReports,
 }: {
   onOpenNetwork: () => void;
   onOpenVocabulary: () => void;
@@ -1523,6 +1535,10 @@ function WelcomeScreen({
   onOpenImport: () => void;
   onOpenDecisions: () => void;
   onOpenManage: () => void;
+  onOpenAgents: () => void;
+  onOpenScenarios: () => void;
+  onOpenOptimization: () => void;
+  onOpenReports: () => void;
 }) {
   const [stats, setStats] = useState<{ nodes: number | null; edges: number | null; status: ConnectionStatus }>({
     nodes: null,
@@ -1559,40 +1575,64 @@ function WelcomeScreen({
 
   const isOnline = stats.status === 'online';
   const metrics: LandingMetric[] = [
-    { label: 'Knowledge nodes', value: formatMetric(stats.nodes, 'Live'), tone: 'cyan' },
-    { label: 'Relationships mapped', value: formatMetric(stats.edges, 'Ready'), tone: 'mint' },
-    { label: 'Graph modes', value: '3', tone: 'amber' },
-    { label: isOnline ? 'Dataset online' : 'Ready to explore', value: isOnline ? 'Active' : 'Standby', tone: 'rose' },
+    { label: '组织体对象', value: formatMetric(stats.nodes, '实时'), tone: 'cyan' },
+    { label: '组织关系', value: formatMetric(stats.edges, '就绪'), tone: 'mint' },
+    { label: '领域包架构', value: 'Domain Pack', tone: 'amber' },
+    { label: isOnline ? '数据服务' : '等待连接', value: isOnline ? '运行中' : '待机', tone: 'rose' },
   ];
 
   const secondaryLaunchers: LandingAction[] = [
     {
-      label: 'Vocabulary',
-      description: 'Schemes and terms',
+      label: '智能体中心',
+      description: '能力目录与只读分析',
+      icon: Bot,
+      onClick: onOpenAgents,
+    },
+    {
+      label: '模型术语',
+      description: '概念、分类与标准术语',
       icon: Database,
       onClick: onOpenVocabulary,
     },
     {
-      label: 'Analyze',
-      description: 'Inference and queries',
+      label: '组织体分析',
+      description: '规则推演与关系查询',
       icon: BrainCircuit,
       onClick: onOpenReasoning,
     },
     {
-      label: 'Decisions',
-      description: 'Chains and precedents',
+      label: '场景与推演',
+      description: '变化、验证与状态迁移',
+      icon: Route,
+      onClick: onOpenScenarios,
+    },
+    {
+      label: '优化决策',
+      description: '运行与候选方案比较',
+      icon: Radar,
+      onClick: onOpenOptimization,
+    },
+    {
+      label: '决策分析',
+      description: '依据、影响与证据链',
       icon: Scale,
       onClick: onOpenDecisions,
     },
     {
-      label: 'Enrich',
-      description: 'Import and resolve',
+      label: '数据与知识',
+      description: '导入、对齐与登记',
       icon: GitBranchPlus,
       onClick: onOpenImport,
     },
     {
-      label: 'Manage',
-      description: 'Lineage and ontology',
+      label: '报告中心',
+      description: '结构化会话报告',
+      icon: FileText,
+      onClick: onOpenReports,
+    },
+    {
+      label: '系统管理',
+      description: '来源、演化与治理',
       icon: ShieldCheck,
       onClick: onOpenManage,
     },
@@ -1609,52 +1649,51 @@ function WelcomeScreen({
               <div className="landing-status-dot" />
               <span className="landing-status-text">{CONNECTION_STATUS_LABEL[stats.status]}</span>
               <div className="landing-status-divider" />
-              <span className="landing-status-version">Semantica v2 · Semantic Intelligence</span>
+              <span className="landing-status-version">COE Runtime · Verified-MBSE</span>
             </div>
 
             <div className="landing-kicker" aria-label="Product category">
               <span className="landing-kicker-mark" aria-hidden="true" />
-              Knowledge Explorer
+              复杂组织体搭建平台
             </div>
 
             <h1 className="landing-title">
-              Navigate knowledge<br />
-              like a <span>living system.</span>
+              搭建、推演并验证<br />
+              <span>复杂组织体。</span>
             </h1>
             <p className="landing-subtitle">
-              Semantica turns dense knowledge graphs into a navigable command center —
-              discovery, reasoning, provenance, distance intelligence, and decision context,
-              all in one interface.
+              以领域模型、场景、约束和知识图谱为基础，贯通验证、优化、
+              决策分析与来源追溯；铁路是首个 Domain Pack，而非平台边界。
             </p>
 
             <div className="landing-cta-row">
               <button className="landing-cta-primary" type="button" onClick={onOpenNetwork}>
                 <Network size={16} />
-                Open Semantica Explorer
+                打开复杂组织体
                 <ArrowRight size={15} />
               </button>
               <button className="landing-cta-secondary" type="button" onClick={onOpenReasoning}>
                 <BrainCircuit size={15} />
-                Run Reasoning
+                运行规则推演
               </button>
             </div>
           </div>
 
           {/* ── Preview panel ── */}
-          <div className="landing-preview" aria-label="Knowledge graph preview">
+          <div className="landing-preview" aria-label="复杂组织体关系预览">
             <div className="landing-preview-topbar" aria-hidden="true">
               <div className="landing-preview-dot" />
               <div className="landing-preview-dot" />
               <div className="landing-preview-dot" />
-              <div className="landing-preview-tab">Semantica Explorer</div>
+              <div className="landing-preview-tab">复杂组织体工作区</div>
             </div>
             <div className="landing-command-card">
               <div className="landing-command-icon">
                 <Search size={15} />
               </div>
               <div>
-                <div className="landing-command-label">Search command, node, or concept</div>
-                <div className="landing-command-meta">distance heatmap · focused view · causal path</div>
+                <div className="landing-command-label">搜索对象、关系、规则或场景</div>
+                <div className="landing-command-meta">组织结构 · 聚焦视图 · 影响路径</div>
               </div>
             </div>
             <div className="landing-preview-orbit">
@@ -1694,16 +1733,16 @@ function WelcomeScreen({
               </svg>
             </div>
             <div className="landing-dossier-card">
-              <div className="landing-dossier-kicker">Entity Dossier</div>
-              <div className="landing-dossier-title">NSRP1</div>
-              <div className="landing-dossier-row"><span>Distance band</span><strong>Near</strong></div>
-              <div className="landing-dossier-row"><span>Path coherence</span><strong>0.84</strong></div>
-              <div className="landing-dossier-row"><span>Provenance</span><strong>Audited</strong></div>
+              <div className="landing-dossier-kicker">组织体对象档案</div>
+              <div className="landing-dossier-title">Entity</div>
+              <div className="landing-dossier-row"><span>模型状态</span><strong>已登记</strong></div>
+              <div className="landing-dossier-row"><span>约束状态</span><strong>可验证</strong></div>
+              <div className="landing-dossier-row"><span>来源追溯</span><strong>可审计</strong></div>
             </div>
             <div className="landing-timeline-card">
               <div className="landing-timeline-header">
-                <span className="landing-timeline-title">Temporal Evidence</span>
-                <span className="landing-timeline-badge">66% coverage</span>
+                <span className="landing-timeline-title">状态演化证据</span>
+                <span className="landing-timeline-badge">版本可追溯</span>
               </div>
               <div className="landing-timeline-track" />
               <div className="landing-timeline-labels">
@@ -1725,18 +1764,18 @@ function WelcomeScreen({
         </div>
 
         {/* ── Workspace grid ── */}
-        <section aria-label="Workspaces">
+        <section aria-label="核心工作区">
           <div className="landing-section-header">
-            <h2 className="landing-section-title">Workspaces</h2>
+            <h2 className="landing-section-title">核心工作区</h2>
             <div className="landing-section-line" />
           </div>
           <div className="landing-workspace-grid">
             <button className="landing-workspace-card landing-workspace-card--primary" type="button" onClick={onOpenNetwork}>
               <div>
-                <div className="landing-workspace-card-eyebrow">Primary Workspace</div>
-                <div className="landing-workspace-card-title">Semantica Explorer</div>
+                <div className="landing-workspace-card-eyebrow">核心建模入口</div>
+                <div className="landing-workspace-card-title">复杂组织体</div>
                 <div className="landing-workspace-card-desc">
-                  Full graph, grouped communities, focused neighborhoods, and distance intelligence — all in one canvas.
+                  统一查看组织对象、资源、任务、规则、方案及其关联关系，并保留 Runtime 图分析能力。
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1765,13 +1804,13 @@ function WelcomeScreen({
         </section>
 
         {/* ── Capability band ── */}
-        <section className="landing-capability-band" aria-label="Intelligence capabilities">
-          <div className="landing-capability-label">Intelligence Layer</div>
-          <div className="landing-capability"><Radar size={12} />Distance Heatmap</div>
-          <div className="landing-capability"><Network size={12} />Focused Neighborhood</div>
-          <div className="landing-capability"><GitMerge size={12} />Grouped Communities</div>
-          <div className="landing-capability"><Route size={12} />Trace Causal Path</div>
-          <div className="landing-capability"><ShieldCheck size={12} />Provenance Dossier</div>
+        <section className="landing-capability-band" aria-label="平台核心能力">
+          <div className="landing-capability-label">核心能力</div>
+          <div className="landing-capability"><Radar size={12} />场景推演</div>
+          <div className="landing-capability"><Network size={12} />组织关系</div>
+          <div className="landing-capability"><GitMerge size={12} />规则验证</div>
+          <div className="landing-capability"><Route size={12} />影响路径</div>
+          <div className="landing-capability"><ShieldCheck size={12} />全链路追溯</div>
         </section>
 
       </div>
@@ -1841,6 +1880,10 @@ export default function App() {
           }}
           onOpenDecisions={() => setActiveWorkspace('decisions')}
           onOpenManage={() => setActiveWorkspace('manage')}
+          onOpenAgents={() => setActiveWorkspace('agents')}
+          onOpenScenarios={() => setActiveWorkspace('scenarios')}
+          onOpenOptimization={() => setActiveWorkspace('optimization')}
+          onOpenReports={() => setActiveWorkspace('reports')}
         />
       );
     }
@@ -1848,9 +1891,9 @@ export default function App() {
     if (activeWorkspace === 'explore') {
       return (
         <WorkspaceShell
-          title="Explore"
-          subtitle={exploreView === 'graph' ? undefined : exploreView === 'memories' ? "Browse and edit canonical AgentMemory documents." : "Browse the graph and switch views without leaving the workspace."}
-          kicker={exploreView === 'graph' ? 'Graph Studio' : exploreView === 'memories' ? 'Memory Browser' : 'Vocabulary Browser'}
+          title="复杂组织体"
+          subtitle={exploreView === 'graph' ? undefined : exploreView === 'memories' ? "浏览和编辑规范化 AgentMemory 文档。" : "浏览组织体模型的概念、分类和标准术语。"}
+          kicker={exploreView === 'graph' ? '组织体结构' : exploreView === 'memories' ? '记忆浏览器' : '模型术语'}
           compact
           tabs={
             <ExploreWorkspaceTabs
@@ -1875,19 +1918,27 @@ export default function App() {
       );
     }
 
+    if (activeWorkspace === 'agents') {
+      return <WorkspaceShell title="智能体中心" subtitle="查看面向建模、验证、推演、优化、决策和报告的业务智能体能力与只读分析。" kicker="Agent Center" compact><ErrorBoundary key="agents"><Suspense fallback={<WorkspaceFallback />}><AgentWorkspace /></Suspense></ErrorBoundary></WorkspaceShell>;
+    }
+
+    if (activeWorkspace === 'scenarios') {
+      return <WorkspaceShell title="场景与推演" subtitle="管理与基础事实分离的业务场景，并进入验证、推演和优化流程。" kicker="Scenario Workspace" compact><ErrorBoundary key="scenarios"><Suspense fallback={<WorkspaceFallback />}><ScenarioWorkspace onOpenOptimization={() => switchWorkspace('optimization')} /></Suspense></ErrorBoundary></WorkspaceShell>;
+    }
+
     if (activeWorkspace === 'analyze') {
       return (
         <WorkspaceShell
-          title="Analyze"
-          subtitle="Query the active graph and test inference rules."
-          kicker={analyzeView === 'reasoning' ? 'Reasoning Engine' : 'SPARQL Query'}
+          title="组织体分析"
+          subtitle="查询当前组织体关系，检查规则并验证推演结果。"
+          kicker={analyzeView === 'reasoning' ? '规则推演' : 'SPARQL 查询'}
           tabs={
             <>
               <button className="workspace-tab" data-active={analyzeView === 'reasoning'} onClick={() => setAnalyzeView('reasoning')}>
-                Reasoning Playground
+                规则推演
               </button>
               <button className="workspace-tab" data-active={analyzeView === 'sparql'} onClick={() => setAnalyzeView('sparql')}>
-                SPARQL Querying
+                SPARQL 查询
               </button>
             </>
           }
@@ -1904,38 +1955,46 @@ export default function App() {
     if (activeWorkspace === 'decisions') {
       return (
         <WorkspaceShell
-          title="Decisions"
-          subtitle="Inspect decision chains, causal context, and precedent matches."
-          kicker="Decision Intelligence"
+          title="决策分析"
+          subtitle="检查候选决策、影响路径和完整证据链。"
+          kicker="决策支持"
         >
           <ErrorBoundary key="decisions">
             <Suspense fallback={<WorkspaceFallback />}>
-              <DecisionWorkspace />
+              <DecisionWorkspace onOpenOptimization={() => switchWorkspace('optimization')} />
             </Suspense>
           </ErrorBoundary>
         </WorkspaceShell>
       );
     }
 
+    if (activeWorkspace === 'reports') {
+      return <WorkspaceShell title="报告中心" subtitle="汇总组织体、场景、验证、优化和决策依据，形成可核查报告。" kicker="Report Center" compact><ErrorBoundary key="reports"><Suspense fallback={<WorkspaceFallback />}><ReportWorkspace /></Suspense></ErrorBoundary></WorkspaceShell>;
+    }
+
+    if (activeWorkspace === 'optimization') {
+      return <WorkspaceShell title="优化决策" subtitle="定义优化问题，运行领域求解器并检查可追溯候选方案。" kicker="Optimization Workspace" compact><ErrorBoundary key="optimization"><Suspense fallback={<WorkspaceFallback />}><OptimizationWorkspace /></Suspense></ErrorBoundary></WorkspaceShell>;
+    }
+
     if (activeWorkspace === 'enrich') {
       return (
         <WorkspaceShell
-          title="Enrich"
-          subtitle="Import, export, reconcile, and audit graph entities."
-          kicker="Knowledge Audit"
+          title="数据与知识"
+          subtitle="导入、导出、对齐并审查组织体数据。"
+          kicker="数据治理"
           tabs={
             <>
               <button className="workspace-tab" data-active={enrichView === 'import'} onClick={() => setEnrichView('import')}>
-                Import and Export
+                导入与导出
               </button>
               <button className="workspace-tab" data-active={enrichView === 'merge'} onClick={() => setEnrichView('merge')}>
-                Diff and Merge
+                差异与合并
               </button>
               <button className="workspace-tab" data-active={enrichView === 'resolve'} onClick={() => setEnrichView('resolve')}>
-                Entity Resolution
+                实体对齐
               </button>
               <button className="workspace-tab" data-active={enrichView === 'registry'} onClick={() => setEnrichView('registry')}>
-                Registry
+                数据登记
               </button>
             </>
           }
@@ -1955,9 +2014,9 @@ export default function App() {
     if (activeWorkspace === 'ontology-hub') {
       return (
         <WorkspaceShell
-          title="Ontology Hub"
-          subtitle="Load, browse, edit, and govern ontologies and vocabularies."
-          kicker="Schema Governance"
+          title="模型与规则"
+          subtitle="加载、浏览、编辑并治理组织体模型、规则、约束和版本。"
+          kicker="模型治理"
           compact
         >
           <ErrorBoundary key="ontology-hub">
@@ -1977,19 +2036,19 @@ export default function App() {
 
     return (
       <WorkspaceShell
-        title="Manage"
-        subtitle="Review provenance, lineage, ontology, and governance context."
-        kicker="Graph Governance"
+        title="系统管理"
+        subtitle="查看数据来源、演化链路、模型概览和治理信息。"
+        kicker="平台治理"
         tabs={
           <>
             <button className="workspace-tab" data-active={manageView === 'lineage'} onClick={() => setManageView('lineage')}>
-              PROV-O Lineage
+              来源与演化链
             </button>
             <button className="workspace-tab" data-active={manageView === 'kg-overview'} onClick={() => setManageView('kg-overview')}>
-              KG Overview
+              组织体数据概览
             </button>
             <button className="workspace-tab" data-active={manageView === 'ontology'} onClick={() => setManageView('ontology')}>
-              Ontology Summary
+              模型概要
             </button>
           </>
         }
@@ -2013,7 +2072,7 @@ export default function App() {
       <style>{shellStyles}</style>
       <div className="app-shell">
         <aside className="app-rail">
-          <button className="brand-pill" title="Semantica Knowledge Explorer" onClick={() => switchWorkspace('welcome')} style={{ cursor: 'pointer', border: '1px solid rgba(127,208,255,0.18)' }}>SKE</button>
+          <button className="brand-pill" title="复杂组织体搭建平台" onClick={() => switchWorkspace('welcome')} style={{ cursor: 'pointer', border: '1px solid rgba(127,208,255,0.18)' }}>COE</button>
           {navItems.map(({ id, label, hint, icon: Icon }) => (
             <button
               key={id}
