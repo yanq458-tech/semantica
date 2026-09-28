@@ -6,6 +6,7 @@ import test from "node:test";
 import { chromium, type Page } from "playwright";
 
 const BASE_URL = "http://127.0.0.1:4175";
+const NPM_COMMAND = "npm";
 const initialNodes = [
   { id: "alice", type: "Person", content: "Alice", properties: {} },
   { id: "bob", type: "Person", content: "Bob", properties: {} },
@@ -45,7 +46,7 @@ async function assertLegendMatchesGraph(page: Page, nodeIds?: string[]) {
 }
 
 test("visible legend follows loaded data, reloads, focused views, and distance mode", async (t) => {
-  const server = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", "4175", "--strictPort"], { stdio: "ignore" });
+  const server = spawn(NPM_COMMAND, ["run", "dev", "--", "--host", "127.0.0.1", "--port", "4175", "--strictPort"], { stdio: "ignore", shell: process.platform === "win32" });
   t.after(() => { server.kill(); });
   let ready = false;
   for (let i = 0; i < 100; i += 1) {
@@ -79,7 +80,7 @@ test("visible legend follows loaded data, reloads, focused views, and distance m
     await route.fulfill({ json });
   });
   await page.goto(BASE_URL);
-  await page.getByRole("button", { name: "Open Semantica Explorer" }).click();
+  await page.getByRole("button", { name: /打开复杂组织体|Open Semantica Explorer/ }).click();
   const legend = page.getByRole("group", { name: "Node colors" });
   await legend.waitFor();
   await page.locator("canvas").first().waitFor({ state: "visible" });

@@ -7,6 +7,7 @@ import { chromium, type Page } from "playwright";
 
 const PORT = 4173;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
+const NPM_COMMAND = "npm";
 
 const nodes = [
   { id: "alice", type: "Person", content: "Alice", properties: {} },
@@ -24,9 +25,10 @@ const edges = [
 let server: ChildProcess | undefined;
 
 async function startVite(): Promise<void> {
-  server = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", String(PORT)], {
+  server = spawn(NPM_COMMAND, ["run", "dev", "--", "--host", "127.0.0.1", "--port", String(PORT)], {
     cwd: process.cwd(),
     stdio: "ignore",
+    shell: process.platform === "win32",
   });
 
   for (let attempt = 0; attempt < 50; attempt += 1) {
@@ -82,7 +84,7 @@ test("real Explorer loading path hydrates and renders API edge labels", async (t
   });
   await installApiFixture(page);
   await page.goto(BASE_URL);
-  await page.getByRole("button", { name: /Open Semantica Explorer/ }).click();
+  await page.getByRole("button", { name: /打开复杂组织体|Open Semantica Explorer/ }).click();
 
   await page.locator("canvas").nth(0).waitFor({ state: "attached" });
   await page.waitForFunction(() => document.querySelectorAll("canvas").length >= 2);
