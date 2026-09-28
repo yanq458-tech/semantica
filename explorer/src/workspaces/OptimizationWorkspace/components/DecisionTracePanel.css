@@ -1,0 +1,39 @@
+.opt-causal-note {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+  padding: 11px;
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 9px;
+  background: var(--ws-accent-soft);
+}
+
+.opt-causal-note strong {
+  color: var(--ws-accent);
+  font-size: 11px;
+}
+
+.opt-causal-note span {
+  color: var(--ws-text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.opt-evidence-intervention > span {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+}
+
+.opt-evidence-decision > span,
+.opt-evidence-observed_outcome > span {
+  background: rgba(52, 211, 153, 0.14);
+  color: #6ee7b7;
+}
+
+.opt-causal-detail {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.18);
+}
