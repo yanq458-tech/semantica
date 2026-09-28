@@ -1,5 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Scale, Search, ArrowRight, Info } from "lucide-react";
+import { Scale, Search, ArrowRight, Info, GitCompareArrows, ShieldCheck, Waypoints } from "lucide-react";
+import { CausalAnalysisPanel } from './CausalAnalysisPanel';
+import { loadDecisionAnalysis } from './api';
+import type { DecisionAnalysis } from './types';
+import { DecisionAnalysisSummary } from './DecisionAnalysisSummary';
+import './DecisionAnalysisSummary.css';
 
 type OutcomeKind = "approved" | "rejected" | "deferred" | "pending" | string;
 
@@ -69,8 +74,8 @@ function CausalFlow({ chain, loading }: { chain: ChainStep[]; loading: boolean }
   if (!chain.length) return (
     <div className="ws-empty">
       <div className="ws-empty-icon"><Info size={28} /></div>
-      <div className="ws-empty-title">No chain steps</div>
-      <div className="ws-empty-body">No causal chain steps were found for this decision.</div>
+      <div className="ws-empty-title">暂无影响路径</div>
+      <div className="ws-empty-body">当前决策没有返回可展示的证据链步骤。</div>
     </div>
   );
   return (
@@ -85,7 +90,7 @@ function CausalFlow({ chain, loading }: { chain: ChainStep[]; loading: boolean }
   );
 }
 
-export function DecisionWorkspace() {
+export function DecisionWorkspace({ onOpenOptimization }: { onOpenOptimization?: () => void }) {
   const [decisions, setDecisions] = useState<{ decision_id: string; category?: string; outcome?: string }[]>([]);
   const [selected, setSelected] = useState<{ decision_id: string; category?: string; outcome?: string } | null>(null);
   const [chain, setChain] = useState<ChainStep[]>([]);
@@ -93,6 +98,7 @@ export function DecisionWorkspace() {
   const [listLoading, setListLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [error, setError] = useState("");
+  const [analysis, setAnalysis] = useState<DecisionAnalysis>();
 
   // Tracks the active chain request so stale responses from rapid selections are ignored.
   const chainCtrlRef = useRef<AbortController | null>(null);
@@ -136,6 +142,7 @@ export function DecisionWorkspace() {
     setSelected(d);
     setChainLoading(true);
     setChain([]);
+    setAnalysis(undefined);
     setError("");
     try {
       const res = await fetch(`/api/decisions/${encodeURIComponent(d.decision_id)}/chain`, { signal: ctrl.signal });
@@ -145,6 +152,7 @@ export function DecisionWorkspace() {
         setError(data.message || "Warning: Partial success loading chain.");
       }
       if (!ctrl.signal.aborted) setChain(data.chain || []);
+      void loadDecisionAnalysis(d.decision_id).then((value) => { if (!ctrl.signal.aborted) setAnalysis(value); }).catch(() => { /* Historical records keep the legacy view. */ });
     } catch (e) {
       if (e instanceof Error && e.name !== "AbortError") {
         setError(e.message);
@@ -164,6 +172,18 @@ export function DecisionWorkspace() {
     );
   }, [decisions, filter]);
 
+  const evidenceSummary = useMemo(() => {
+    const count = (pattern: RegExp) => chain.filter((step) => pattern.test(`${step.type ?? ''} ${step.relationship ?? ''} ${step.content ?? ''}`)).length;
+    return {
+      data: count(/data|dataset|input|scenario/i),
+      rules: count(/rule|constraint|shacl|validation/i),
+      model: count(/model|solver|optimization|run/i),
+      solution: count(/solution|assignment|decision|objective/i),
+    };
+  }, [chain]);
+
+  const feasibleCount = decisions.filter((item) => !/reject|fail|infeasible/i.test(item.outcome ?? '')).length;
+
   return (
     <div className="ws-page" style={{ flexDirection: "row" }}>
       {/* ── Sidebar list ── */}
@@ -173,7 +193,7 @@ export function DecisionWorkspace() {
             <div style={{ width: 30, height: 30, borderRadius: 9, background: "var(--ws-accent-soft)", border: "1px solid var(--ws-border-strong)", display: "grid", placeItems: "center", color: "var(--ws-accent)", flexShrink: 0 }}>
               <Scale size={15} />
             </div>
-            <div style={{ color: "var(--ws-text)", fontSize: 14, fontWeight: 700 }}>Decisions</div>
+            <div style={{ color: "var(--ws-text)", fontSize: 14, fontWeight: 700 }}>决策记录</div>
             {decisions.length > 0 && !listLoading && (
               <span className="ws-pill ws-pill--mono" style={{ marginLeft: "auto" }}>{decisions.length}</span>
             )}
@@ -183,7 +203,7 @@ export function DecisionWorkspace() {
             <input
               className="ws-input"
               type="text"
-              placeholder="Filter by ID, category, outcome…"
+              placeholder="按 ID、类别或状态筛选…"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               style={{ paddingLeft: 30, fontSize: 12 }}
@@ -198,8 +218,8 @@ export function DecisionWorkspace() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="ws-empty" style={{ padding: "28px 12px" }}>
-              <div className="ws-empty-title">{decisions.length === 0 ? "No decisions" : "No matches"}</div>
-              <div className="ws-empty-body">{decisions.length === 0 ? "No decisions available in the graph." : "Adjust your filter."}</div>
+              <div className="ws-empty-title">{decisions.length === 0 ? "暂无决策" : "没有匹配项"}</div>
+              <div className="ws-empty-body">{decisions.length === 0 ? "当前组织体数据中没有决策记录。" : "请调整筛选条件。"}</div>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -242,7 +262,7 @@ export function DecisionWorkspace() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
                 <div>
-                  <div className="ws-eyebrow" style={{ marginBottom: 6 }}>Decision Record</div>
+                  <div className="ws-eyebrow" style={{ marginBottom: 6 }}>决策记录</div>
                   <h2 className="ws-title">{selected.decision_id}</h2>
                 </div>
                 {selected.outcome && <OutcomeBadge outcome={selected.outcome} />}
@@ -252,24 +272,39 @@ export function DecisionWorkspace() {
               )}
             </div>
 
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(110px,1fr))", gap: 9, marginBottom: 16 }}>
+              {[
+                ["决策数量", decisions.length], ["当前可用候选", feasibleCount], ["证据链步骤", chain.length], ["约束与规则证据", evidenceSummary.rules],
+              ].map(([label, value]) => <div className="ws-card" style={{ padding: 13 }} key={String(label)}><div style={{ color: "var(--ws-text-dim)", fontSize: 9, marginBottom: 5 }}>{label}</div><strong style={{ fontSize: 19 }}>{value}</strong></div>)}
+            </div>
+
+            {analysis && <DecisionAnalysisSummary analysis={analysis}/>} 
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <section className="ws-card" style={{ padding: 17 }}><div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12 }}><ShieldCheck size={15} color="var(--ws-accent)"/><strong>决策依据</strong></div><div style={{ display: "grid", gap: 7, fontSize: 11, color: "var(--ws-text-muted)" }}><div>输入数据与场景：{evidenceSummary.data} 项证据</div><div>业务规则与数学约束：{evidenceSummary.rules} 项证据</div><div>模型、运行与求解器：{evidenceSummary.model} 项证据</div><div>方案、分配与目标值：{evidenceSummary.solution} 项证据</div></div></section>
+              <section className="ws-card" style={{ padding: 17 }}><div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12 }}><GitCompareArrows size={15} color="var(--ws-accent)"/><strong>方案与约束分析</strong></div><p style={{ fontSize: 11, lineHeight: 1.65, color: "var(--ws-text-muted)", margin: "0 0 12px" }}>{evidenceSummary.rules ? `当前证据链包含 ${evidenceSummary.rules} 项规则或约束依据。请沿影响路径检查具体满足关系。` : "当前通用决策接口未返回可识别的约束证据；不据此推断方案满足情况。"}</p>{onOpenOptimization && <button className="ws-btn ws-btn--ghost" onClick={onOpenOptimization}>打开候选方案 KPI 对比 <ArrowRight size={13}/></button>}</section>
+            </div>
+
             {/* Chain section */}
             <div className="ws-card" style={{ padding: 22 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 999, background: "linear-gradient(135deg, var(--ws-accent), var(--ws-amber))", boxShadow: "0 0 10px rgba(74,163,255,0.4)" }} />
-                <div style={{ color: "var(--ws-text)", fontSize: 14, fontWeight: 700 }}>Causal Chain</div>
+                <Waypoints size={15} color="var(--ws-accent)"/>
+                <div style={{ color: "var(--ws-text)", fontSize: 14, fontWeight: 700 }}>影响路径与完整证据链</div>
                 {chain.length > 0 && !chainLoading && (
                   <span className="ws-pill ws-pill--accent" style={{ marginLeft: "auto" }}>{chain.length} step{chain.length !== 1 ? "s" : ""}</span>
                 )}
               </div>
-              <CausalFlow chain={chain} loading={chainLoading} />
+              <CausalAnalysisPanel decisionId={selected.decision_id} legacyFallback={<CausalFlow chain={chain} loading={chainLoading} />} />
             </div>
+            <div className="ws-card" style={{ padding: 18, marginTop: 16 }}><div style={{ fontSize: 13, fontWeight: 800, marginBottom: 8 }}>方案解释</div><p style={{ margin: 0, color: "var(--ws-text-muted)", fontSize: 11, lineHeight: 1.7 }}>该记录的结论为“{selected.outcome ?? '未标注'}”。系统当前仅依据已返回的 {chain.length} 个证据链步骤展示来源与影响关系；若需要判断“为什么选择某个资源”或比较 KPI，请进入优化决策查看 Assignment 解释与候选 Solution 对比。此说明由确定性模板生成，不使用 LLM。</p></div>
           </div>
         ) : (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
             <div className="ws-empty">
               <div className="ws-empty-icon"><Scale size={32} /></div>
-              <div className="ws-empty-title">No decision selected</div>
-              <div className="ws-empty-body">Select a decision from the list to inspect its causal chain and metadata.</div>
+              <div className="ws-empty-title">尚未选择决策</div>
+              <div className="ws-empty-body">从左侧选择决策，查看依据、约束和影响路径。</div>
             </div>
           </div>
         )}
